@@ -1,3 +1,5 @@
+only_if { (ENV['CIS_VERSION'] || DEFAULT_CIS_VERSION) == 1 }
+
 control "xccdf_org.cisecurity.benchmarks_rule_1.1_Install_Updates_Patches_and_Additional_Security_Software" do
   title "Install Updates, Patches and Additional Security Software"
   desc  "Periodically patches are released for included software either due to security flaws or to include additional functionality."
@@ -148,6 +150,90 @@ control "xccdf_org.cisecurity.benchmarks_rule_2.17_Set_Sticky_Bit_on_All_World-W
   end
 end
 
+control "xccdf_org.cisecurity.benchmarks_rule_2.18_Disable_Mounting_of_cramfs_Filesystems" do
+  title "Disable Mounting of cramfs Filesystems"
+  desc  "The cramfs filesystem type is a compressed read-only Linux filesystem embedded in small footprint systems. A cramfs image can be used without having to first decompress the image."
+  impact 0.0
+  describe bash("modprobe -n -v cramfs") do
+    its("stdout") { should match /^install \/bin\/true/ }
+  end
+  describe bash("lsmod | egrep \"^cramfs\\s\"") do
+    its("exit_status") { should_not eq 0 }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_2.19_Disable_Mounting_of_freevxfs_Filesystems" do
+  title "Disable Mounting of freevxfs Filesystems"
+  desc  "The freevxfs filesystem type is a free version of the Veritas type filesystem. This is the primary filesystem type for HP-UX operating systems."
+  impact 0.0
+  describe bash("modprobe -n -v freevxfs") do
+    its("stdout") { should match /^install \/bin\/true/ }
+  end
+  describe bash("lsmod | egrep \"^freevxfs\\s\"") do
+    its("exit_status") { should_not eq 0 }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_2.20_Disable_Mounting_of_jffs2_Filesystems" do
+  title "Disable Mounting of jffs2 Filesystems"
+  desc  "The jffs2 (journaling flash filesystem 2) filesystem type is a log-structured filesystem used in flash memory devices."
+  impact 0.0
+  describe bash("modprobe -n -v jffs2") do
+    its("stdout") { should match /^install \/bin\/true/ }
+  end
+  describe bash("lsmod | egrep \"^jffs2\\s\"") do
+    its("exit_status") { should_not eq 0 }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_2.21_Disable_Mounting_of_hfs_Filesystems" do
+  title "Disable Mounting of hfs Filesystems"
+  desc  "The hfs filesystem type is a hierarchical filesystem that allows you to mount Mac OS filesystems."
+  impact 0.0
+  describe bash("modprobe -n -v hfs") do
+    its("stdout") { should match /^install \/bin\/true/ }
+  end
+  describe bash("lsmod | egrep \"^hfs\\s\"") do
+    its("exit_status") { should_not eq 0 }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_2.22_Disable_Mounting_of_hfsplus_Filesystems" do
+  title "Disable Mounting of hfsplus Filesystems"
+  desc  "The hfsplus filesystem type is a hierarchical filesystem designed to replace hfs that allows you to mount Mac OS filesystems."
+  impact 0.0
+  describe bash("modprobe -n -v hfsplus") do
+    its("stdout") { should match /^install \/bin\/true/ }
+  end
+  describe bash("lsmod | egrep \"^hfsplus\\s\"") do
+    its("exit_status") { should_not eq 0 }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_2.23_Disable_Mounting_of_squashfs_Filesystems" do
+  title "Disable Mounting of squashfs Filesystems"
+  desc  "The squashfs filesystem type is a compressed read-only Linux filesystem embedded in small footprint systems (similar to cramfs). A squashfs image can be used without having to first decompress the image."
+  impact 0.0
+  describe bash("modprobe -n -v squashfs") do
+    its("stdout") { should match /^install \/bin\/true/ }
+  end
+  describe bash("lsmod | egrep \"^squashfs\\s\"") do
+    its("exit_status") { should_not eq 0 }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_2.24_Disable_Mounting_of_udf_Filesystems" do
+  title "Disable Mounting of udf Filesystems"
+  desc  "The udf filesystem type is the universal disk format used to implement ISO/IEC 13346 and ECMA-167 specifications. This is an open vendor filesystem type for data storage on a broad range of media. This filesystem type is necessary to support writing DVDs and newer optical disc formats."
+  impact 0.0
+  describe bash("modprobe -n -v udf") do
+    its("stdout") { should match /^install \/bin\/true/ }
+  end
+  describe bash("lsmod | egrep \"^udf\\s\"") do
+    its("exit_status") { should_not eq 0 }
+  end
+end
+
 control "xccdf_org.cisecurity.benchmarks_rule_2.25_Disable_Automounting" do
   title "Disable Automounting"
   desc  "autofs allows automatic mounting of devices, typically including CD/DVDs and USB drives."
@@ -238,6 +324,21 @@ control "xccdf_org.cisecurity.benchmarks_rule_4.4_Disable_Prelink" do
   impact 1.0
   describe bash("dpkg -s prelink | egrep \"^Status:\\ install\"") do
     its("exit_status") { should_not eq 0 }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_4.5_Activate_AppArmor" do
+  title "Activate AppArmor"
+  desc  "AppArmor provides a Mandatory Access Control (MAC) system that greatly augments the default Discretionary Access Control (DAC) model."
+  impact 1.0
+  describe bash("apparmor_status") do
+    its("stdout") { should_not match /^0 profiles are loaded.$/ }
+  end
+  describe bash("apparmor_status") do
+    its("stdout") { should match /^0 profiles are in complain mode.$/ }
+  end
+  describe bash("apparmor_status") do
+    its("stdout") { should match /^0 processes are unconfined but have a profile defined.$/ }
   end
 end
 
@@ -781,6 +882,252 @@ control "xccdf_org.cisecurity.benchmarks_rule_7.7_Ensure_Firewall_is_active" do
   end
 end
 
+control "xccdf_org.cisecurity.benchmarks_rule_8.1.1.1_Configure_Audit_Log_Storage_Size" do
+  title "Configure Audit Log Storage Size"
+  desc  "Configure the maximum size of the audit log file. Once the log reaches the maximum size, it will be rotated and a new log file will be started."
+  impact 0.0
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_8.1.1.2_Disable_System_on_Audit_Log_Full" do
+  title "Disable System on Audit Log Full"
+  desc  "The auditd daemon can be configured to halt the system when the audit logs are full."
+  impact 0.0
+  describe bash("awk '/^ *space_left_action/ { print $0 }' /etc/audit/auditd.conf").stdout.to_s.[](/^\s*\S+\s*=\s*(.+?)\s*(#.*)?$/, 1) do
+    it { should eq "email" }
+  end
+  describe bash("awk '/^ *action_mail_acct/ { print $0 }' /etc/audit/auditd.conf").stdout.to_s.[](/^\s*\S+\s*=\s*(.+?)\s*(#.*)?$/, 1) do
+    it { should eq "root" }
+  end
+  describe bash("awk '/^ *admin_space_left_action/ { print $0 }' /etc/audit/auditd.conf").stdout.to_s.[](/^\s*\S+\s*=\s*(.+?)\s*(#.*)?$/, 1) do
+    it { should eq "halt" }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_8.1.1.3_Keep_All_Auditing_Information" do
+  title "Keep All Auditing Information"
+  desc  "Normally, auditd will hold 4 logs of maximum log file size before deleting older log files."
+  impact 1.0
+  describe file("/etc/audit/auditd.conf") do
+    its("content") { should match /^max_log_file_action\s*=\s*keep_logs$/ }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_8.1.2_Install_and_Enable_auditd_Service" do
+  title "Install and Enable auditd Service"
+  desc  "Install and turn on the auditd daemon to record system events."
+  impact 1.0
+  describe bash("dpkg -s auditd | egrep \"^Status:\\ install\"") do
+    its("exit_status") { should eq 0 }
+  end
+  describe bash("ls /etc/rc*.d/S*auditd") do
+    its("exit_status") { should eq 0 }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_8.1.3_Enable_Auditing_for_Processes_That_Start_Prior_to_auditd" do
+  title "Enable Auditing for Processes That Start Prior to auditd"
+  desc  "Configure grub or lilo so that processes that are capable of being audited can be audited even if they start up prior to auditd startup."
+  impact 1.0
+  describe bash("grep \"^\\s*linux\\s\" /boot/grub/grub.cfg | grep -v \"audit=1\"") do
+    its("stdout") { should_not match /.+/ }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_8.1.4_Record_Events_That_Modify_Date_and_Time_Information" do
+  title "Record Events That Modify Date and Time Information"
+  desc  "Capture events where the system date and/or time has been modified. The parameters in this section are set to determine if the adjtimex (tune kernel clock), settimeofday (Set time, using timeval and timezone structures) stime (using seconds since 1/1/1970) or clock_settime (allows for the setting of several internal clocks and timers) system calls have been executed and always write an audit record to the /var/log/audit.log file upon exit, tagging the records with the identifier \"time-change\""
+  impact 1.0
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match /^ *-a +(always,exit|exit,always) +-F +arch=b32 +-S +adjtimex +-S +settimeofday +-S +stime +-k +time-change$/ }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match /^ *-a +(always,exit|exit,always) +-F +arch=b32 +-S +clock_settime +-k +time-change$/ }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match /^ *-w +\/etc\/localtime +-p +wa +-k +time-change$/ }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_8.1.5_Record_Events_That_Modify_UserGroup_Information" do
+  title "Record Events That Modify User/Group Information"
+  desc  "Record events affecting the group, passwd (user IDs), shadow and gshadow (passwords) or /etc/security/opasswd (old passwords, based on remember parameter in the PAM configuration) files. The parameters in this section will watch the files to see if they have been opened for write or have had attribute changes (e.g. permissions) and tag them with the identifier \"identity\" in the audit log file."
+  impact 1.0
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match /^\s*-w \/etc\/group -p wa -k identity/ }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match /^\s*-w \/etc\/passwd -p wa -k identity/ }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match /^\s*-w \/etc\/gshadow -p wa -k identity/ }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match /^\s*-w \/etc\/shadow -p wa -k identity/ }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match /^\s*-w \/etc\/security\/opasswd -p wa -k identity/ }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_8.1.6_Record_Events_That_Modify_the_Systems_Network_Environment" do
+  title "Record Events That Modify the System's Network Environment"
+  desc  "Record changes to network environment files or system calls. The below parameters monitor the sethostname (set the systems host name) or setdomainname (set the systems domainname) system calls, and write an audit event on system call exit. The other parameters monitor the /etc/issue and /etc/issue.net files (messages displayed pre-login), /etc/hosts (file containing host names and associated IP addresses) and /etc/network (directory containing network interface scripts and configurations) files."
+  impact 1.0
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match /^ *-a +(always,exit|exit,always) +-F +arch=b32 +-S +sethostname +-S +setdomainname +-k +system-locale$/ }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match /^ *-w +\/etc\/issue +-p +wa +-k +system-locale$/ }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match /^ *-w +\/etc\/issue.net +-p +wa +-k +system-locale$/ }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match /^ *-w +\/etc\/hosts +-p +wa +-k +system-locale$/ }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match /^ *-w +\/etc\/network +-p +wa +-k +system-locale$/ }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_8.1.7_Record_Events_That_Modify_the_Systems_Mandatory_Access_Controls" do
+  title "Record Events That Modify the System's Mandatory Access Controls"
+  desc  "Monitor SELinux mandatory access controls. The parameters below monitor any write access (potential additional, deletion or modification of files in the directory) or attribute changes to the /etc/selinux directory."
+  impact 1.0
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match /^\s*-w \/etc\/selinux\/ -p wa -k MAC-policy/ }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_8.1.8_Collect_Login_and_Logout_Events" do
+  title "Collect Login and Logout Events"
+  desc  "Monitor login and logout events. The parameters below track changes to files associated with login/logout events. The file /var/log/faillog tracks failed events from login. The file /var/log/lastlog maintain records of the last time a user successfully logged in. The file /var/log/tallylog maintains records of failures via the pam_tally2 module"
+  impact 1.0
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match /^\s*-w \/var\/log\/faillog -p wa -k logins/ }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match /^\s*-w \/var\/log\/lastlog -p wa -k logins/ }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match /^\s*-w \/var\/log\/tallylog -p wa -k logins/ }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_8.1.9_Collect_Session_Initiation_Information" do
+  title "Collect Session Initiation Information"
+  desc  "Monitor session initiation events. The parameters in this section track changes to the files associated with session events. The file /var/run/utmp file tracks all currently logged in users. The /var/log/wtmp file tracks logins, logouts, shutdown and reboot events. All audit records will be tagged with the identifier \"session.\" The file /var/log/btmp keeps track of failed login attempts and can be read by entering the command /usr/bin/last -f /var/log/btmp. All audit records will be tagged with the identifier \"logins.\""
+  impact 1.0
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match /^\s*-w \/var\/run\/utmp -p wa -k session/ }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match /^\s*-w \/var\/log\/wtmp -p wa -k session/ }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match /^\s*-w \/var\/log\/btmp -p wa -k session/ }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_8.1.10_Collect_Discretionary_Access_Control_Permission_Modification_Events" do
+  title "Collect Discretionary Access Control Permission Modification Events"
+  desc  "Monitor changes to file permissions, attributes, ownership and group. The parameters in this section track changes for system calls that affect file permissions and attributes. The chmod, fchmod and fchmodat system calls affect the permissions associated with a file. The chown, fchown, fchownat and lchown system calls affect owner and group attributes on a file. The setxattr, lsetxattr, fsetxattr (set extended file attributes) and removexattr, lremovexattr, fremovexattr (remove extended file attributes) control extended file attributes. In all cases, an audit record will only be written for non-system userids (auid >= 500) and will ignore Daemon events (auid = 4294967295). All audit records will be tagged with the identifier \"perm_mod.\""
+  impact 1.0
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match /^ *-a +(always,exit|exit,always) +-F +arch=b32 +-S +chmod +-S +fchmod +-S +fchmodat +-F +auid>=500 +-F +auid!=4294967295 +-k +perm_mod$/ }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match /^ *-a +(always,exit|exit,always) +-F +arch=b32 +-S +chown +-S +fchown +-S +fchownat +-S +lchown +-F +auid>=500 +-F +auid!=4294967295 +-k +perm_mod$/ }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match /^ *-a +(always,exit|exit,always) +-F +arch=b32 +-S +setxattr +-S +lsetxattr +-S +fsetxattr +-S +removexattr +-S +lremovexattr +-S +fremovexattr +-F +auid>=500 +-F +auid!=4294967295 +-k +perm_mod$/ }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_8.1.11_Collect_Unsuccessful_Unauthorized_Access_Attempts_to_Files" do
+  title "Collect Unsuccessful Unauthorized Access Attempts to Files"
+  desc  "Monitor for unsuccessful attempts to access files. The parameters below are associated with system calls that control creation (creat), opening (open, openat) and truncation (truncate, ftruncate) of files. An audit log record will only be written if the user is a non-privileged user (auid > = 500), is not a Daemon event (auid=4294967295) and if the system call returned EACCES (permission denied to the file) or EPERM (some other permanent error associated with the specific system call). All audit records will be tagged with the identifier \"access.\""
+  impact 1.0
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match /^ *-a +(always,exit|exit,always) +-F +arch=b32 +-S +creat +-S +open +-S +openat +-S +truncate +-S +ftruncate +-F +exit=-EACCES +-F +auid>=500 +-F +auid!=4294967295 +-k +access$/ }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match /^ *-a +(always,exit|exit,always) +-F +arch=b32 +-S +creat +-S +open +-S +openat +-S +truncate +-S +ftruncate +-F +exit=-EPERM +-F +auid>=500 +-F +auid!=4294967295 +-k +access$/ }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_8.1.12_Collect_Use_of_Privileged_Commands" do
+  title "Collect Use of Privileged Commands"
+  desc  "Monitor privileged programs (those that have the setuid and/or setgid bit set on execution) to determine if unprivileged users are running these commands."
+  impact 1.0
+  describe bash("for i in `df --local -P|awk {'if (NR!=1) print $6'}|xargs -I '{}' find '{}' -xdev -type f \\( -perm -2000 -o -perm -4000 \\)`; do egrep -q \"^ *\\-a +(always,exit|exit,always) +\\-F +path=$i +\\-F +perm=x +\\-F +auid>=500 +\\-F +auid!=4294967295 +-k +privileged$\" /etc/audit/audit.rules;if [ $? -ne 0 ]; then echo $i use is not properly audited;fi;done") do
+    its("stdout") { should_not match /.+/ }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_8.1.13_Collect_Successful_File_System_Mounts" do
+  title "Collect Successful File System Mounts"
+  desc  "Monitor the use of the mount system call. The mount (and umount) system call controls the mounting and unmounting of file systems. The parameters below configure the system to create an audit record when the mount system call is used by a non-privileged user"
+  impact 1.0
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match /^ *-a +(always,exit|exit,always) +-F +arch=b32 +-S +mount +-F +auid>=500 +-F +auid!=4294967295 +-k +mounts$/ }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_8.1.14_Collect_File_Deletion_Events_by_User" do
+  title "Collect File Deletion Events by User"
+  desc  "Monitor the use of system calls associated with the deletion or renaming of files and file attributes. This configuration statement sets up monitoring for the unlink (remove a file), unlinkat (remove a file attribute), rename (rename a file) and renameat (rename a file attribute) system calls and tags them with the identifier \"delete\"."
+  impact 1.0
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match /^ *-a +(always,exit|exit,always) +-F +arch=b32 +-S +unlink +-S +unlinkat +-S +rename +-S +renameat +-F +auid>=500 +-F +auid!=4294967295 +-k +delete$/ }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_8.1.15_Collect_Changes_to_System_Administration_Scope_sudoers" do
+  title "Collect Changes to System Administration Scope (sudoers)"
+  desc  "Monitor scope changes for system administrations. If the system has been properly configured to force system administrators to log in as themselves first and then use the sudo command to execute privileged commands, it is possible to monitor changes in scope. The file /etc/sudoers will be written to when the file or its attributes have changed. The audit records will be tagged with the identifier \"scope.\""
+  impact 1.0
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match /^\s*-w \/etc\/sudoers -p wa -k scope/ }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_8.1.16_Collect_System_Administrator_Actions_sudolog" do
+  title "Collect System Administrator Actions (sudolog)"
+  desc  "Monitor the sudo log file. If the system has been properly configured to disable the use of the su command and force all administrators to have to log in first and then use sudo to execute privileged commands, then all administrator commands will be logged to /var/log/sudo.log. Any time a command is executed, an audit event will be triggered as the /var/log/sudo.log file will be opened for write and the executed administration command will be written to the log."
+  impact 1.0
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match /^\s*-w \/var\/log\/sudo.log -p wa -k actions/ }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_8.1.17_Collect_Kernel_Module_Loading_and_Unloading" do
+  title "Collect Kernel Module Loading and Unloading"
+  desc  "Monitor the loading and unloading of kernel modules. The programs insmod (install a kernel module), rmmod (remove a kernel module), and modprobe (a more sophisticated program to load and unload modules, as well as some other features) control loading and unloading of modules. The init_module (load a module) and delete_module (delete a module) system calls control loading and unloading of modules. Any execution of the loading and unloading module programs and system calls will trigger an audit record with an identifier of \"modules\"."
+  impact 1.0
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match /^ *-w +\/sbin\/insmod +-p +x +-k +modules$/ }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match /^ *-w +\/sbin\/rmmod +-p +x +-k +modules$/ }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match /^ *-w +\/sbin\/modprobe +-p +x +-k +modules$/ }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match /^ *-a +(always,exit|exit,always) +-F +arch=b32 +-S +init_module +-S +delete_module +-k +modules$/ }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_8.1.18_Make_the_Audit_Configuration_Immutable" do
+  title "Make the Audit Configuration Immutable"
+  desc  "Set system audit so that audit rules cannot be modified with auditctl. Setting the flag \"-e 2\" forces audit to be put in immutable mode. Audit changes can only be made on system reboot."
+  impact 1.0
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match /^\s*-e 2/ }
+  end
+end
+
 control "xccdf_org.cisecurity.benchmarks_rule_8.2.1_Install_the_rsyslog_package" do
   title "Install the rsyslog package"
   desc  "The rsyslog package is a third party package that provides many enhancements to syslog, such as multi-threading, TCP communication, message filtering and data base support."
@@ -833,6 +1180,24 @@ control "xccdf_org.cisecurity.benchmarks_rule_8.2.6_Accept_Remote_rsyslog_Messag
   title "Accept Remote rsyslog Messages Only on Designated Log Hosts"
   desc  "By default, rsyslog does not listen for log messages coming in from remote systems. The ModLoad tells rsyslog to load the imtcp.so module so it can listen over a network via TCP. The InputTCPServerRun option instructs rsyslogd to listen on the specified TCP port."
   impact 0.0
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_8.3.1_Install_AIDE" do
+  title "Install AIDE"
+  desc  "In some installations, AIDE is not installed automatically."
+  impact 1.0
+  describe bash("dpkg -s aide | egrep \"^Status:\\ install\"") do
+    its("exit_status") { should eq 0 }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_8.3.2_Implement_Periodic_Execution_of_File_Integrity" do
+  title "Implement Periodic Execution of File Integrity"
+  desc  "Implement periodic file checking, in compliance with site policy."
+  impact 1.0
+  describe bash("crontab -u root -l") do
+    its("stdout") { should match /^[^#].*aide.*(-C|--check)/ }
+  end
 end
 
 control "xccdf_org.cisecurity.benchmarks_rule_8.4_Configure_logrotate" do

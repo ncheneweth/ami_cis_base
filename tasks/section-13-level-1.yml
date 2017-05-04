@@ -1,0 +1,271 @@
+---
+# file: tasks/section-13-level-1.yml
+
+- name: 13.1 Ensure Password Fields are Not Empty (Scored)
+  shell: /bin/cat /etc/shadow | /usr/bin/awk -F':' '($2 == "" ) { print $1 " does not have a password "}'
+  register: command_result
+  failed_when: 'command_result.stdout != ""'
+  tags:
+    - scored
+    - section13.1
+    - manual_remediation
+
+- name: 13.2 Verify No Legacy "+" Entries Exist in /etc/passwd File (Scored)
+  shell: /bin/grep '^+:' /etc/passwd
+  register: command_result
+  failed_when: 'command_result.stdout != ""'
+  tags:
+    - scored
+    - section13.2
+    - manual_remediation
+
+- name: 13.3 Verify No Legacy "+" Entries Exist in /etc/shadow File (Scored)
+  shell: /bin/grep '^+:' /etc/shadow
+  register: command_result
+  failed_when: 'command_result.stdout != ""'
+  tags:
+    - scored
+    - section13.3
+    - manual_remediation
+
+- name: 13.4 Verify No Legacy "+" Entries Exist in /etc/group File (Scored)
+  shell: /bin/grep '^+:' /etc/group
+  register: command_result
+  failed_when: 'command_result.stdout != ""'
+  tags:
+    - scored
+    - section13.4
+    - manual_remediation
+
+- name: 13.5 Verify No UID 0 Accounts Exist Other Than root (Scored)
+  shell: /bin/cat /etc/passwd | /usr/bin/awk -F':' '($3 == 0) { print $1 }'
+  register: uid_results
+  tags:
+    - scored
+    - section13.5
+
+- name: 13.5 Verify No UID 0 Accounts Exist Other Than root. Ensure that only the word 'root' is returned
+  debug: msg="{{uid_results.stdout}}"
+  when: uid_results is defined and uid_results.stdout|length > 0
+  tags:
+    - scored
+    - section13.5
+
+- name: 13.6 Ensure root PATH Integrity (Scored)
+  copy: src=check_path_integrity.sh dest=/root/check_path_integrity.sh owner=root group=root mode=755
+  tags:
+    - scored
+    - section13.6
+
+- name: 13.6 Ensure root PATH Integrity (Scored)
+  shell: bash /root/check_path_integrity.sh
+  tags:
+    - scored
+    - section13.6
+
+- name: 13.7 Check Permissions on User Home Directories (Scored)
+  shell: bash /root/check_home_dirs_permissions.sh
+  register: command_result
+  failed_when: 'command_result.stdout != ""'
+  tags:
+    - scored
+    - section13.7
+    - manual_remediation
+
+- name: 13.8 Check User Dot File Permissions (Scored)
+  shell: bash /root/check_user_dot_files_permissions.sh
+  register: command_result
+  failed_when: 'command_result.stdout != ""'
+  tags:
+    - scored
+    - section13.8
+    - manual_remediation
+
+- name: 13.9 Check Permissions on User .netrc Files (Scored)
+  shell: bash /root/check_user_netrc_permissions.sh
+  register: command_result
+  failed_when: 'command_result.stdout != ""'
+  tags:
+    - scored
+    - section13.9
+
+- name: 13.10 Check for Presence of User .rhosts Files (Scored)
+  shell: bash /root/check_user_rhosts.sh
+  register: command_result
+  failed_when: 'command_result.stdout != ""'
+  tags:
+    - scored
+    - section13.10
+    - manual_remediation
+
+- name: 13.11 Check Groups in /etc/passwd (Scored)
+  copy: src=check_groups.sh dest=/root/check_groups.sh owner=root group=root mode=0750
+  tags:
+    - scored
+    - section13.11
+
+- name: 13.11 Check Groups in /etc/passwd (Scored)
+  shell: bash /root/check_groups.sh
+  register: check_groups
+  tags:
+    - scored
+    - section13.11
+
+- name: 13.11 Check Groups in /etc/passwd (Scored)
+  debug: msg="{{check_groups.stdout}}"
+  when: check_groups is defined and check_groups.stdout|length > 0
+  tags:
+    - scored
+    - section13.11
+
+- name: 13.12 Check That Users Are Assigned Valid Home Directories (Scored)
+  copy: src=check_home_dirs.sh dest=/root/check_home_dirs.sh owner=root group=root mode=0750
+  tags:
+    - scored
+    - section13.12
+
+- name: 13.12 Check That Users Are Assigned Valid Home Directories (Scored)
+  shell: bash /root/check_home_dirs.sh
+  register: check_home_dirs
+  tags:
+    - scored
+    - section13.12
+
+- name: 13.12 Check That Users Are Assigned Valid Home Directories (Scored)
+  debug: msg="{{check_home_dirs.stdout}}"
+  when: check_home_dirs is defined and check_home_dirs.stdout|length > 0
+  tags:
+    - scored
+    - section13.12
+
+- name: 13.13 Check User Home Directory Ownership (Scored)
+  copy: src=check_home_ownership.sh dest=/root/check_home_ownership.sh owner=root group=root mode=0750
+  tags:
+    - scored
+    - section13.13
+
+- name: 13.13 Check User Home Directory Ownership (Scored)
+  shell: bash /root/check_home_ownership.sh
+  register: check_home_ownership
+  tags:
+    - scored
+    - section13.13
+
+- name: 13.13 Check User Home Directory Ownership (Scored)
+  debug: msg="{{check_home_ownership.stdout}}"
+  when: check_home_ownership is defined and check_home_ownership.stdout|length > 0
+  tags:
+    - scored
+    - section13.13
+
+- name: 13.14 Check for Duplicate UIDs (Scored)
+  copy: src=check_duplicate_uids.sh dest=/root/check_duplicate_uids.sh owner=root group=root mode=0750
+  tags:
+    - scored
+    - section13.14
+
+- name: 13.14 Check for Duplicate UIDs (Scored)
+  shell: bash /root/check_duplicate_uids.sh
+  register: check_duplicate_uids
+  tags:
+    - scored
+    - section13.14
+
+- name: 13.14 Check for Duplicate UIDs (Scored)
+  debug: msg="{{check_duplicate_uids.stdout}}"
+  when: check_duplicate_uids is defined and check_duplicate_uids.stdout|length > 0
+  tags:
+    - scored
+    - section13.14
+
+- name: 13.15 Check for Duplicate GIDs (Scored)
+  copy: src=check_duplicate_gids.sh dest=/root/check_duplicate_gids.sh owner=root group=root mode=0750
+  tags:
+    - scored
+    - section13.15
+
+- name: 13.15 Check for Duplicate GIDs (Scored)
+  shell: bash /root/check_duplicate_gids.sh
+  register: check_duplicate_gids
+  tags:
+    - scored
+    - section13.15
+
+- name: 13.15 Check for Duplicate GIDs (Scored)
+  debug: msg="{{check_duplicate_gids.stdout}}"
+  when: check_duplicate_gids is defined and check_duplicate_gids.stdout|length > 0
+  tags:
+    - scored
+    - section13.15
+
+- name: 13.16 Check for Duplicate User Names (Scored)
+  copy: src=check_duplicate_usernames.sh dest=/root/check_duplicate_usernames.sh owner=root group=root mode=0750
+  tags:
+    - scored
+    - section13.16
+
+- name: 13.16 Check for Duplicate User Names (Scored)
+  shell: bash /root/check_duplicate_usernames.sh
+  register: check_duplicate_usernames
+  tags:
+    - scored
+    - section13.16
+
+- name: 13.16 Check for Duplicate User Names (Scored)
+  debug: msg="{{check_duplicate_usernames.stdout}}"
+  when: check_duplicate_usernames is defined and check_duplicate_usernames.stdout|length > 0
+  tags:
+    - scored
+    - section13.16
+
+- name: 13.17 Check for Duplicate Group Names (Scored)
+  copy: src=check_duplicate_groupnames.sh dest=/root/check_duplicate_groupnames.sh owner=root group=root mode=0750
+  tags:
+    - scored
+    - section13.17
+
+- name: 13.17 Check for Duplicate Group Names (Scored)
+  shell: bash /root/check_duplicate_groupnames.sh
+  register: check_duplicate_groupnames
+  tags:
+    - scored
+    - section13.17
+
+- name: 13.17 Check for Duplicate Group Names (Scored)
+  debug: msg="{{check_duplicate_groupnames.stdout}}"
+  when: check_duplicate_groupnames is defined and check_duplicate_groupnames.stdout|length > 0
+  tags:
+    - scored
+    - section13.17
+
+- name: 13.18 Check for Presence of User .netrc Files (Scored)
+  shell: bash /root/check_user_netrc.sh
+  register: command_result
+  failed_when: 'command_result.stdout != ""'
+  ignore_errors: yes
+  tags:
+    - scored
+    - section13.18
+    - manual_remediation
+
+- name: 13.19 Check for Presence of User .forward Files (Scored)
+  shell: bash /root/check_user_forward.sh
+  register: command_result
+  failed_when: 'command_result.stdout != ""'
+  ignore_errors: yes
+  tags:
+    - scored
+    - section13.19
+    - manual_remediation
+
+- name: 13.20 Ensure shadow group is empty (Scored)
+  shell: grep ^shadow /etc/group && awk -F':' '($4 == "<shadow-gid>") { print }' /etc/passwd
+  register: command_result
+  failed_when: 'command_result.stdout != ""'
+  ignore_errors: yes
+  tags:
+    - scored
+    - section13.20
+    - manual_remediation
+
+# vim: set sw=2 ts=2:

@@ -1,0 +1,70 @@
+---
+#file: tasks/section-12-level-1.yml
+
+- name: 12.1 & 12.4 Verify Permissions on /etc/passwd (Scored)
+  file: path=/etc/passwd owner=root group=root mode=0644
+  tags:
+    - scored
+    - section12.1
+    - section12.4
+
+- name: 12.2  & 12.5 Verify Permissions on /etc/shadow (Scored)
+  file: path=/etc/shadow owner=root group=root mode=0600
+  tags:
+    - scored
+    - section12.2
+    - section12.5
+
+- name: 12.3 & 12.6 Verify Permissions on /etc/group (Scored)
+  file: path=/etc/group owner=root group=root mode=0644
+  tags:
+    - scored
+    - section12.3
+    - section12.6
+
+- name: 12.7 Find World Writable Files (Not Scored)
+  shell: df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -type f - perm -0002 -print
+  register: command_result
+  failed_when: 'command_result.stdout != ""'
+  tags:
+    - notscored
+    - section12.7
+    - manual_remediation
+
+- name: 12.8 Find Un-owned Files and Directories (Scored)
+  shell: df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -nouser - ls
+  register: command_result
+  failed_when: 'command_result.stdout != ""'
+  tags:
+    - scored
+    - section12.8
+    - manual_remediation
+
+- name: 12.9 Find Un-grouped Files and Directories (Scored)
+  shell: df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -nogroup - ls
+  register: command_result
+  failed_when: 'command_result.stdout != ""'
+  tags:
+    - scored
+    - section12.9
+    - manual_remediation
+
+- name: 12.10 Find SUID System Executables (Not Scored)
+  shell: df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -type f -perm -4000 -print
+  register: command_result
+  failed_when: '((command_result.stdout_lines | difference(allowed_suid_binaries)) | length) > 0'
+  tags:
+    - notscored
+    - section12.10
+    - manual_remediation
+
+- name: 12.11 Find SGID System Executables (Not Scored)
+  shell: df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -type f -perm -2000 -print
+  register: command_result
+  failed_when: '((command_result.stdout_lines | difference(allowed_sgid_binaries)) | length) > 0'
+  tags:
+    - notscored
+    - section12.11
+    - manual_remediation
+
+# vim: set sw=2 ts=2:

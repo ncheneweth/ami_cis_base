@@ -1,0 +1,10 @@
+---
+# file: tasks/section-07.yml
+# Section 7: Network Configuration and Firewalls
+
+- include: section-07-level-1.yml
+  tags:
+    - level-1
+    - section-07-level-1
+
+# vim: set sw=2 ts=2:

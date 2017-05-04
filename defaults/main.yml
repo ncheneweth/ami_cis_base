@@ -1,0 +1,129 @@
+---
+# file: defaults/main.yml
+
+# CIS 5.1.7 Ensure tftp-server is not enabled ??
+# Options:
+#   - yes: disable tftp-server
+#   - no: enable(DO NOT disable) tftp-server
+# Default: yes
+disable_tftp_server: "yes"
+
+# CIS 6.1 Ensure the X Window system is not installed
+# Options:
+#   - yes: remove/uninstall X window system
+#   - no: DO NOT remove/uninstall X window system
+# Default: yes
+remove_x_window: "yes"
+
+# 6.4 Ensure DHCP Server is not enabled
+# Options:
+#   - yes: disable DHCP Server
+#   - no: enable(DO NOT disable) DHCP Server
+# Default: yes
+disable_dhcp_server: "yes"
+
+# 6.6 Ensure LDAP is not enabled
+# Options
+#   - yes: disable & uninstall LDAP
+#   - no: do not disable/uninstall LDAP
+# Default: yes
+disable_ldap_server: "yes"
+
+# 6.8 Ensure DNS Server is not enabled
+# Options:
+#   - yes: disable DNS server
+#   - no: DO NOT disable DNS server
+# Default: yes
+disable_dns_server: "yes"
+
+# 6.9 Ensure FTP Server is not enabled
+# Options:
+#   - yes: disable FTP server
+#   - no: DO NOT disable FTP server
+# Default: yes
+disable_ftp_server: "yes"
+
+# 6.10 Ensure HTTP Server is not enabled
+# Options:
+#   - yes: disable HTTP server
+#   - no: DO NOT disable HTTP server
+# Default: no
+disable_http_server: "yes"
+
+# 6.11 Ensure IMAP & POP Server is not enabled
+# Options:
+#   - yes: disable IMAP & POP server
+#   - no: DO NOT disable IMAP & POP server
+# Default: yes
+disable_dovecot_server: "yes"
+
+# 6.12 Ensure Samba is not enabled
+# Options:
+#   - yes: disable Samba
+#   - no: DO NOT disable Samba
+# Default: no
+disable_samba_server: "yes"
+
+# 6.13 Ensure HTTP Proxy Server is not enabled
+# Options:
+#   - yes: disable HTTP Proxy server
+#   - no: DO NOT disable HTTP Proxy server
+# Default: yes
+disable_squid_server: "yes"
+
+# 7.3 Configure IPv6
+# This section disables IPv6 if it's not being used!
+# Options:
+#   - yes: disable IPv6
+#   - no: DO NOT disable IPv6
+# Default: no
+disable_ipv6: "yes"
+
+# 7.5 Uncommon Network Protocols
+# This section recommends disabling unused protocols in the kernel
+# Options:
+#   - yes: disable protocols as recommended
+#   - no: DO NOT disable protocols as recommended
+# Default: yes
+disable_dccp: "yes"
+disable_sctp: "yes"
+disable_rds: "yes"
+disable_tipc: "yes"
+
+# 7.7 Ensure Firewall is active
+# Enable firewall(ufw) if you use ufw firewall, otherwise don't!
+# In most cases people use iptables-persistent on Debian based distro
+enable_ufw: "yes"
+
+# 10.1.1 Set Password Expiration Days
+# Maximum number of days a password may be used
+# Default: 90
+pass_max_days: 90
+
+# 10.1.2 Set Password Change Minimum Number of Days
+# Minimum number of days allowed between password changes.
+# Default: 7
+pass_min_days: 7
+
+# 10.1.3 Set Password Expiring Warning Days
+# Number of days warning given before a password expires
+# Default: 7
+pass_warn_age: 7
+
+# 10.2 Disable System Accounts
+# Sets system accounts' shell to /usr/sbin/nologin. Therefore, to use
+# a system account you have to a shell option(-s) in su command
+# Only root, shutdown, halt & sync system accounts will not be affected!
+# Options:
+#   - yes: disable system accounts
+#   - no: DO NOT disable system accounts
+# Default: no
+disable_system_accounts: "no"
+
+# 12.10 Find SUID System Executables (Not Scored)
+allowed_suid_binaries: []
+
+# 12.11 Find SGID System Executables (Not Scored)
+allowed_sgid_binaries: []
+
+# vim: set sw=2 ts=2:

@@ -1,0 +1,238 @@
+---
+#file: tasks/section-09-level-1.yml
+
+- name: 9.1 Configure cron
+  debug: msg="*** the system does have maintenance jobs that may include security monitoring that have to run and cron is used to execute them"
+  tags:
+    - section9.1
+
+- name: 9.1.1 Enable cron Daemon (Scored)
+  service: name=cron state=started enabled=yes
+  tags:
+    - scored
+    - section9.1
+    - section9.1.1
+
+- name: 9.1.2 Set User/Group Owner and Permission on /etc/crontab (Scored)
+  file: path=/etc/crontab owner=root group=root mode=0600
+  tags:
+    - scored
+    - section9.1
+    - section9.1.2
+
+- name: 9.1.3 Set User/Group Owner and Permission on /etc/cron.hourly (Scored)
+  file: path=/etc/cron.hourly owner=root group=root mode=0600 recurse=yes
+  tags:
+    - scored
+    - section9.1
+    - section9.1.3
+
+- name: 9.1.4 Set User/Group Owner and Permission on /etc/cron.daily (Scored)
+  file: path=/etc/cron.daily owner=root group=root mode=0600 recurse=yes
+  tags:
+    - scored
+    - section9.1
+    - section9.1.4
+
+- name: 9.1.5 Set User/Group Owner and Permission on /etc/cron.weekly(Scored)
+  file: path=/etc/cron.weekly owner=root group=root mode=0600 recurse=yes
+  tags:
+    - scored
+    - section9.1
+    - section9.1.5
+
+- name: 9.1.6 Set User/Group Owner and Permission on /etc/cron.monthly(Scored)
+  file: path=/etc/cron.monthly owner=root group=root mode=0600 recurse=yes
+  tags:
+    - scored
+    - section9.1
+    - section9.1.6
+
+- name: 9.1.7 Set User/Group Owner and Permission on /etc/cron.d (Scored)
+  file: path=/etc/cron.d owner=root group=root mode=0600 recurse=yes
+  tags:
+    - scored
+    - section9.1
+    - section9.1.7
+
+- name: 9.1.8 Restrict at/cron to Authorized Users (Scored)
+  file: path={{ item.path }} owner=root group=root mode=0600 state={{ item.state }}
+  with_items:
+    - { path: "/etc/cron.deny", state: absent }
+    - { path: "/etc/at.deny", state: absent }
+    - { path: "/etc/cron.allow", state: touch }
+    - { path: "/etc/at.allow", state: touch }
+  tags:
+    - scored
+    - section9.1
+    - section9.1.8
+
+- name: 9.2 Configure PAM
+  debug: msg="*** PAM (Pluggable Authentication Modules) is a service that implements modular authentication modules on UNIX systems"
+  tags:
+    - section9.2
+
+- name: 9.2.1  & 9.2.3 Configure PAM
+  copy: src=pam.d/common-password dest=/etc/pam.d/common-password owner=root group=root mode=0644
+  tags:
+    - scored
+    - section9.2
+    - section9.2.1
+    - section9.2.3
+
+- name: 9.2.2 Set Lockout for Failed Password Attempts (Not Scored)
+  lineinfile: dest=/etc/pam.d/login line="auth required pam_tally2.so onerr=fail audit silent deny=5 unlock_time=900" insertbefore=BOF
+  tags:
+    - notscored
+    - section9.2
+    - section9.2.2
+
+- name: 9.3 Configure SSH
+  debug: msg="*** It is strongly recommended that sites abandon older clear-text login protocols and use SSH to prevent session hijacking and sniffing of sensitive data off the network."
+  tags:
+    - section9.3
+
+- name: 9.3 Configure SSH
+  apt: name=openssh-server update_cache=yes state=present
+  tags:
+    - scored
+    - section9.3
+
+- name: 9.3.1 Set SSH Protocol to 2 (Scored)
+  lineinfile: dest=/etc/ssh/sshd_config regexp="^Protocol" line="Protocol 2" state=present
+  notify: restart ssh
+  tags:
+    - scored
+    - section9.3
+    - section9.3.1
+
+- name: 9.3.2 Set LogLevel to INFO (Scored)
+  lineinfile: dest=/etc/ssh/sshd_config regexp="^LogLevel" line="LogLevel INFO" state=present
+  notify: restart ssh
+  tags:
+    - scored
+    - section9.3
+    - section9.3.2
+
+- name: 9.3.3 Set Permissions on /etc/ssh/sshd_config (Scored)
+  file: path=/etc/ssh/sshd_config owner=root group=root mode=0600
+  tags:
+    - scored
+    - section9.3
+    - section9.3.3
+
+- name: 9.3.4 Disable SSH X11 Forwarding (Scored)
+  lineinfile: dest=/etc/ssh/sshd_config regexp="^X11Forwarding" line="X11Forwarding no" state=present
+  notify: restart ssh
+  tags:
+    - scored
+    - section9.3
+    - section9.3.4
+
+- name: 9.3.5 Set SSH MaxAuthTries to 4 or Less (Scored)
+  lineinfile: dest=/etc/ssh/sshd_config regexp="^MaxAuthTries" line="MaxAuthTries 4" state=present
+  notify: restart ssh
+  tags:
+    - scored
+    - section9.3
+    - section9.3.5
+
+- name: 9.3.6 Set SSH IgnoreRhosts to Yes (Scored)
+  lineinfile: dest=/etc/ssh/sshd_config regexp="^IgnoreRhosts" line="IgnoreRhosts yes" state=present
+  notify: restart ssh
+  tags:
+    - scored
+    - section9.3
+    - section9.3.6
+
+- name: 9.3.7 Set SSH HostbasedAuthentication to No (Scored)
+  lineinfile: dest=/etc/ssh/sshd_config regexp="^HostbasedAuthentication" line="HostbasedAuthentication no" state=present
+  notify: restart ssh
+  tags:
+    - scored
+    - section9.3
+    - section9.3.7
+
+- name: 9.3.8 Disable SSH Root Login (Scored)
+  lineinfile: dest=/etc/ssh/sshd_config regexp="^PermitRootLogin" line="PermitRootLogin no" state=present
+  notify: restart ssh
+  tags:
+    - scored
+    - section9.3
+    - section9.3.8
+
+- name: 9.3.9 Set SSH PermitEmptyPasswords to No (Scored)
+  lineinfile: dest=/etc/ssh/sshd_config regexp="^PermitEmptyPasswords" line="PermitEmptyPasswords no" state=present
+  notify: restart ssh
+  tags:
+    - scored
+    - section9.3
+    - section9.3.9
+
+- name: 9.3.10 Do Not Allow Users to Set Environment Options (Scored)
+  lineinfile: dest=/etc/ssh/sshd_config regexp="^PermitUserEnvironment" line="PermitUserEnvironment no" state=present
+  notify: restart ssh
+  tags:
+    - scored
+    - section9.3
+    - section9.3.10
+
+- name: 9.3.11 Use Only Approved Cipher in Counter Mode (Scored)
+  lineinfile: dest=/etc/ssh/sshd_config regexp="^Ciphers" line="Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes128-ctr" state=present
+  notify: restart ssh
+  tags:
+    - scored
+    - section9.3
+    - section9.3.11
+
+- name: 9.3.11 Use Only Approved Cipher in Counter Mode (Scored)
+  lineinfile: dest=/etc/ssh/sshd_config line="{{item}}" state=present insertafter=EOF
+  with_items:
+    - "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,hmac-ripemd160"
+    - "KexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256,diffie-hellman-group14-sha1,diffie-hellman-group-exchange-sha1"
+  notify: restart ssh
+  tags:
+    - scored
+    - section9.3
+    - section9.3.11
+
+- name: 9.3.12 Set Idle Timeout Interval for User Login (Scored)
+  lineinfile: dest=/etc/ssh/sshd_config regexp={{ item.regex }} line="{{item.line}}" state=present
+  with_items:
+    - { regex: "^ClientAliveInterval", line: "ClientAliveInterval 300" }
+    - { regex: "^ClientAliveCountMax", line: "ClientAliveCountMax 0" }
+  notify: restart ssh
+  tags:
+    - scored
+    - section9.3
+    - section9.3.12
+
+- name: 9.3.13 Limit Access via SSH (Scored)
+  debug: msg="*** Evaluate your infrastructure before limiting logins using AllowUsers, AllowGroups, DenyUsers or DenyGroups"
+  tags:
+    - scored
+    - section9.3
+    - section9.3.13
+
+- name: 9.3.14 Set SSH Banner (Scored)
+  lineinfile: dest=/etc/ssh/sshd_config regexp="^Banner" line="Banner /etc/issue.net" state=present
+  notify: restart ssh
+  tags:
+    - scored
+    - section9.3
+    - section9.3.14
+
+- name: 9.4 Restrict root Login to System Console (Not Scored)
+  copy: content="" dest=/etc/securetty owner=root group=root mode=0644
+  tags:
+    - notscored
+    - section9.4
+    - manual_remediation
+
+- name: 9.5 Restrict Access to the su Command (Scored)
+  lineinfile: dest=/etc/pam.d/su line="auth required pam_wheel.so use_uid" insertbefore=BOF state=present
+  tags:
+    - scored
+    - section9.5
+
+# vim: set sw=2 ts=2:

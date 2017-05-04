@@ -1,0 +1,264 @@
+---
+# file: tasks/section-07-level-1.yml
+
+- name: 7.1 Modify Network Parameters (Host Only)
+  debug: msg="*** A system is considered host only if the system has a single interface, or has multiple interfaces but will not be configured as a router"
+  tags:
+    - section7.1
+
+- name: 7.1.1 Disable IP Forwarding (Scored)
+  sysctl: name=net.ipv4.ip_forward value=0 ignoreerrors=yes sysctl_set=yes reload=yes state=present
+  notify: flush routing cache
+  tags:
+    - scored
+    - section7.1
+    - section7.1.1
+
+- name: 7.1.2 Disable Send Packet Redirects (Scored)
+  sysctl: name="{{item}}" value=0 ignoreerrors=yes sysctl_set=yes reload=yes state=present
+  with_items:
+    - net.ipv4.conf.all.send_redirects
+    - net.ipv4.conf.default.send_redirects
+  notify: flush routing cache
+  tags:
+    - scored
+    - section7.1
+    - section7.1.2
+
+- name: 7.2 Modify Network Parameters (Host and Router)
+  debug: msg="*** A system acts as a router if it has at least two interfaces and is configured to perform routing functions"
+  tags:
+    - section7.2
+
+- name: 7.2.1 Disable Source Routed Packet Acceptance (Scored)
+  sysctl: name="{{item}}" value=0 ignoreerrors=yes sysctl_set=yes reload=yes state=present
+  with_items:
+    - net.ipv4.conf.all.accept_source_route
+    - net.ipv4.conf.default.accept_source_route
+  notify: flush routing cache
+  tags:
+    - scored
+    - section7.2
+    - section7.2.1
+
+- name: 7.2.2 Disable ICMP Redirect Acceptance (Scored)
+  sysctl: name="{{item}}" value=0 ignoreerrors=yes sysctl_set=yes reload=yes state=present
+  with_items:
+    - net.ipv4.conf.all.accept_redirects
+    - net.ipv4.conf.default.accept_redirects
+  notify: flush routing cache
+  tags:
+    - scored
+    - section7.2
+    - section7.2.2
+
+- name: 7.2.3 Disable Secure ICMP Redirect Acceptance (Scored)
+  sysctl: name="{{item}}" value=0 ignoreerrors=yes sysctl_set=yes reload=yes state=present
+  with_items:
+    - net.ipv4.conf.all.secure_redirects
+    - net.ipv4.conf.default.secure_redirects
+  notify: flush routing cache
+  tags:
+    - scored
+    - section7.2
+    - section7.2.3
+
+- name: 7.2.4 Log Suspicious Packets (Scored)
+  sysctl: name="{{item}}" value=1 ignoreerrors=yes sysctl_set=yes reload=yes state=present
+  with_items:
+    - net.ipv4.conf.all.log_martians
+    - net.ipv4.conf.default.log_martians
+  notify: flush routing cache
+  tags:
+    - scored
+    - section7.2
+    - section7.2.4
+
+- name: 7.2.5 Enable Ignore Broadcast Requests (Scored)
+  sysctl: name=net.ipv4.icmp_echo_ignore_broadcasts value=1 ignoreerrors=yes sysctl_set=yes reload=yes state=present
+  notify: flush routing cache
+  tags:
+    - scored
+    - section7.2
+    - section7.2.5
+
+- name: 7.2.6 Enable Bad Error Message Protection (Scored)
+  sysctl: name=net.ipv4.icmp_ignore_bogus_error_responses value=1 ignoreerrors=yes sysctl_set=yes reload=yes state=present
+  notify: flush routing cache
+  tags:
+    - scored
+    - section7.2
+    - section7.2.6
+
+- name: 7.2.7 Enable RFC-recommended Source Route Validation (Scored)
+  sysctl: name="{{item}}" value=1 ignoreerrors=yes sysctl_set=yes reload=yes state=present
+  with_items:
+    - net.ipv4.conf.all.rp_filter
+    - net.ipv4.conf.default.rp_filter
+  notify: flush routing cache
+  tags:
+    - scored
+    - section7.2
+    - section7.2.7
+
+- name: 7.2.8 Enable TCP SYN Cookies (Scored)
+  sysctl: name=net.ipv4.tcp_syncookies value=1 ignoreerrors=yes sysctl_set=yes reload=yes state=present
+  notify: flush routing cache
+  tags:
+    - scored
+    - section7.2
+    - section7.2.8
+
+- name: 7.3 Configure IPv6
+  debug: msg="*** If IPv6 is to be used, follow this section of the benchmark to configure IPv6, otherwise disable IPv6"
+  tags:
+    - section7.3
+
+- name: 7.3.1 Disable IPv6 Router Advertisements (Not Scored)
+  sysctl: name="{{item}}" value=0 ignoreerrors=yes sysctl_set=yes reload=yes state=present
+  when: disable_ipv6 == "yes"
+  with_items:
+    - net.ipv6.conf.all.accept_ra
+    - net.ipv6.conf.default.accept_ra
+  notify: flush ipv6 routing cache
+  tags:
+    - notscored
+    - section7.3
+    - section7.3.1
+
+- name: 7.3.2 Disable IPv6 Redirect Acceptance (Not Scored)
+  sysctl: name="{{item}}" value=0 ignoreerrors=yes sysctl_set=yes reload=yes state=present
+  when: disable_ipv6 == "yes"
+  with_items:
+    - net.ipv6.conf.all.accept_redirects
+    - net.ipv6.conf.default.accept_redirects
+  notify: flush ipv6 routing cache
+  tags:
+    - notscored
+    - section7.3
+    - section7.3.2
+
+- name: 7.3.3 Disable IPv6 (Not Scored)
+  sysctl: name="{{item}}" value=1 ignoreerrors=yes sysctl_set=yes reload=yes state=present
+  when: disable_ipv6 == "yes"
+  with_items:
+    - net.ipv6.conf.all.disable_ipv6
+    - net.ipv6.conf.default.disable_ipv6
+    - net.ipv6.conf.lo.disable_ipv6
+  notify: flush ipv6 routing cache
+  tags:
+    - notscored
+    - section7.3
+    - section7.3.3
+
+- name: 7.4 Install TCP Wrappers
+  debug: msg="***  TCP Wrappers add an additional layer of protection by defining which hosts are or are not allowed to connect to 'wrapped' network services"
+  tags:
+    - section7.4
+
+- name: 7.4.1 Install TCP Wrappers (Scored)
+  apt: name=tcpd update_cache=yes  state=installed
+  tags:
+    - scored
+    - section7.4
+    - section7.4.1
+
+- name: 7.4.2 Create /etc/hosts.allow (Not Scored)
+  file: path=/etc/hosts.allow state=touch
+  tags:
+    - notscored
+    - section7.4
+    - section7.4.2
+
+- name: 7.4.3 Verify Permissions on /etc/hosts.allow (Scored)
+  file: path=/etc/hosts.allow owner=root group=root mode=0644
+  tags:
+    - scored
+    - section7.4.3
+
+- name: 7.4.4 Create /etc/hosts.deny (Not Scored)
+  file: path=/etc/hosts.deny state=touch
+  tags:
+    - notscored
+    - section7.4
+    - section7.4.4
+
+- name: 7.4.5 Verify Permissions on /etc/hosts.deny (Scored)
+  file: path=/etc/hosts.deny owner=root group=root mode=0644
+  tags:
+    - scored
+    - section7.4
+    - section7.4.5
+
+- name: 7.5 Uncommon Network Protocols
+  debug: msg="*** It is recommended to disable unused protocols in the kernel"
+  tags:
+    - section7.5
+
+- name: Check if /etc/modprobe.d/CIS.conf exists
+  stat: path=/etc/modprobe.d/CIS.conf follow=True
+  register: modprobe_cis_path
+  tags:
+    - section7.5
+    - section7.5.1
+    - section7.5.2
+    - section7.5.3
+    - section7.5.4
+
+- name: Create /etc/modprobe.d/CIS.conf
+  file: path=/etc/modprobe.d/CIS.conf state=touch owner=root group=root mode=0644
+  when: not modprobe_cis_path.stat.exists
+  tags:
+    - section7.5
+    - section7.5.1
+    - section7.5.2
+    - section7.5.3
+    - section7.5.4
+
+- name: 7.5.1 Disable DCCP (Not Scored)
+  lineinfile: dest=/etc/modprobe.d/CIS.conf line="install dccp /bin/true" insertafter=EOF state=present
+  when: disable_dccp == "yes"
+  tags:
+    - notscored
+    - section7.5
+    - section7.5.1
+
+- name: 7.5.2 Disable SCTP (Not Scored)
+  lineinfile: dest=/etc/modprobe.d/CIS.conf line="install sctp /bin/true" insertafter=EOF state=present
+  when: disable_sctp == "yes"
+  tags:
+    - notscored
+    - section7.5
+    - section7.5.2
+
+- name: 7.5.3 Disable RDS (Not Scored)
+  lineinfile: dest=/etc/modprobe.d/CIS.conf line="install rds /bin/true" insertafter=EOF state=present
+  when: disable_rds == "yes"
+  tags:
+    - notscored
+    - section7.5
+    - section7.5.3
+
+- name: 7.5.4 Disable TIPC (Not Scored)
+  lineinfile: dest=/etc/modprobe.d/CIS.conf line="install tipc /bin/true" insertafter=EOF state=present
+  when: disable_tipc == "yes"
+  tags:
+    - notscored
+    - section7.5
+    - section7.5.4
+
+- name: 7.6 Deactivate Wireless Interfaces (Not Scored)
+  command: nmcli nm wifi off
+  ignore_errors: yes
+  tags:
+    - notscored
+    - section7.6
+
+- name: 7.7 Ensure Firewall is active (Scored)
+  service: name=ufw state=started enabled=yes
+  when: enable_ufw == "yes"
+  tags:
+    - scored
+    - section7.7
+
+# vim: set sw=2 ts=2:

@@ -1,0 +1,10 @@
+---
+# file: tasks/section-04.yml
+# Section 4: Additional Process Hardening
+
+- include: section-04-level-1.yml
+  tags:
+    - level-1
+    - section-04-level-1
+
+# vim: set sw=2 ts=2:

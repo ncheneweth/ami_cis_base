@@ -4,16 +4,15 @@ desc 'Run Ruby style checks'
 RuboCop::RakeTask.new(:style)
 
 task :validate do
-  dir = File.join(File.dirname(__FILE__))
-  sh("bundle exec inspec check #{dir}")
+  system('bundle exec kitchen verify')
 end
 
 # assumes a box running with port forwarding on 2222
-task :vagrant do
-  system('bundle exec inspec exec controls/ -t ssh://vagrant@localhost:2222 --password=vagrant --sudo --sudo_password=vagrant')
-end
-
-task test: %w(style vagrant validate)
+#task :vagrant do
+#  system('bundle exec kitchen verify')
+#end
+# for now we're just validating - once we have Packer here we can add steps
+task test: %w(style validate)
 task default: %w(style validate)
 
 begin

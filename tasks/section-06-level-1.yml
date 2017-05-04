@@ -1,0 +1,243 @@
+---
+# file: tasks/section-06-level-1.yml
+
+- name: 6.1 Ensure the X Window system is not installed (Scored)
+  apt: name="xserver-xorg-core*" purge=yes state=absent
+  when: remove_x_window == "yes"
+  tags:
+    - scored
+    - section6.1
+
+- name: 6.2 Ensure Avahi Server is not enabled (Scored)
+  stat: path=/etc/init/avahi-daemon.conf follow=True
+  register: avahi_init_path
+  tags:
+    - scored
+    - section6.2
+
+- name: 6.2 Ensure Avahi Server is not enabled (Scored)
+  service: name=avahi-daemon state=stopped enabled=no
+  when: avahi_init_path is defined and avahi_init_path.stat.exists
+  tags:
+    - scored
+    - section6.2
+
+- name: 6.3 Ensure print server is not enabled (Not Scored)
+  stat: path=/etc/init/cups.conf follow=True
+  register: cups_init_path
+  tags:
+    - notscored
+    - section6.3
+
+- name: 6.3 Ensure print server is not enabled (Not Scored)
+  service: name=cups state=stopped enabled=no
+  when: cups_init_path is defined and cups_init_path.stat.exists
+  tags:
+    - notscored
+    - section6.3
+
+- name: 6.4 Ensure DHCP Server is not enabled (Scored)
+  stat: path=/etc/init/isc-dhcp-server.conf follow=True
+  register: dhcp_init_path
+  tags:
+    - scored
+    - section6.4
+
+- name: 6.4 Ensure DHCP Server is not enabled (Scored)
+  service: name=isc-dhcp-server state=stopped enabled=no
+  when: dhcp_init_path is defined and dhcp_init_path.stat.exists and disable_dhcp_server == "yes"
+  tags:
+    - scored
+    - section6.4
+
+- name: 6.4 Ensure DHCP Server is not enabled (Scored)
+  stat: path=/etc/init/isc-dhcp-server6.conf follow=True
+  register: dhcp6_init_path
+  tags:
+    - scored
+    - section6.4
+
+- name: 6.4 Ensure DHCP Server is not enabled (Scored)
+  service: name=isc-dhcp-server6 state=stopped enabled=no
+  when: dhcp6_init_path is defined and dhcp6_init_path.stat.exists
+  tags:
+    - scored
+    - section6.4
+
+- name: 6.5 Configure Network Time Protocol (NTP) (Scored)
+  apt: name=ntp update_cache=yes state=installed
+  tags:
+    - scored
+    - section6.5
+
+- name: 6.5 Configure Network Time Protocol (NTP) (Scored)
+  service: name=ntp state=started enabled=yes
+  tags:
+    - scored
+    - section6.5
+
+- name: 6.5 Configure Network Time Protocol (NTP) (Scored)
+  lineinfile: regexp={{ item.regexp }} line={{ item.line }} dest=/etc/ntp.conf state=present
+  with_items:
+    - { regexp: "'^restrict -4'", line: "'restrict -4 default kod nomodify notrap nopeer noquery'" }
+    - { regexp: "'^restrict -6'", line: "'restrict -6 default kod nomodify notrap nopeer noquery'" }
+  tags:
+    - scored
+    - section6.5
+
+- name: 6.6 Ensure LDAP is not enabled (Not Scored)
+  apt: name=slapd purge=yes state=absent
+  when: disable_ldap_server == "yes"
+  tags:
+    - notscored
+    - section6.6
+
+- name: 6.7 Ensure NFS and RPC are not enabled (Not Scored)
+  stat: path=/etc/init/rpcbind-boot.conf follow=True
+  register: rpcbind_init_path
+  tags:
+    - notscored
+    - section6.7
+
+- name: 6.7 Ensure NFS and RPC are not enabled (Not Scored)
+  service: name=rpcbind state=stopped enabled=no
+  when: rpcbind_init_path is defined and rpcbind_init_path.stat.exists
+  tags:
+    - notscored
+    - section6.7
+
+- name: 6.8 Ensure DNS Server is not enabled (Not Scored)
+  stat: path=/etc/init/bind9.conf follow=True
+  register: bind9_init_path
+  tags:
+    - notscored
+    - section6.8
+
+- name: 6.8 Ensure DNS Server is not enabled (Not Scored)
+  service: name=bind state=stopped enabled=no
+  when: bind9_init_path is defined and bind9_init_path.stat.exists and disable_dns_server == "yes"
+  tags:
+    - notscored
+    - section6.8
+
+- name: 6.9 Ensure FTP Server is not enabled (Not Scored)
+  stat: path=/etc/init/vsftpd.conf follow=True
+  register: vsftpd_init_path
+  tags:
+    - notscored
+    - section6.9
+
+- name: 6.9 Ensure FTP Server is not enabled (Not Scored)
+  service: name=vsftpd state=stopped enabled=no
+  when: vsftpd_init_path is defined and vsftpd_init_path.stat.exists and disable_ftp_server == "yes"
+  tags:
+    - notscored
+    - section6.9
+
+- name: 6.10 Ensure HTTP Server is not enabled (Not Scored)
+  stat: path=/etc/init/apache2.conf follow=True
+  register: apache2_init_path
+  tags:
+    - notscored
+    - section6.10
+
+- name: 6.10 Ensure HTTP Server is not enabled (Not Scored)
+  service: name=apache2 state=stopped enabled=no
+  when: apache2_init_path is defined and apache2_init_path.stat.exists and disable_http_server == "no"
+  tags:
+    - notscored
+    - section6.10
+
+- name: 6.11 Ensure IMAP and POP server is not enabled (Not Scored)
+  stat: path=/etc/init/dovecot.conf follow=True
+  register: dovecot_init_path
+  tags:
+    - notscored
+    - section6.11
+
+- name: 6.11 Ensure IMAP and POP server is not enabled (Not Scored)
+  service: name=dovecot state=stopped enabled=no
+  when: dovecot_init_path is defined and dovecot_init_path.stat.exists and disable_dovecot_server == "yes"
+  tags:
+    - notscored
+    - section6.11
+
+- name: 6.12 Ensure Samba is not enabled (Not Scored)
+  stat: path=/etc/init/smbd.conf follow=True
+  register: smbd_init_path
+  tags:
+    - notscored
+    - section6.12
+
+- name: 6.12 Ensure Samba is not enabled (Not Scored)
+  service: name=smbd state=stopped enabled=no
+  when: smbd_init_path is defined and smbd_init_path.stat.exists and disable_samba_server == "no"
+  tags:
+    - notscored
+    - section6.12
+
+- name: 6.13 Ensure HTTP Proxy Server is not enabled (Not Scored)
+  stat: path=/etc/init/squid3.conf follow=True
+  register: squid3_init_path
+  tags:
+    - notscored
+    - section6.13
+
+- name: 6.13 Ensure HTTP Proxy Server is not enabled (Not Scored)
+  service: name=squid3 state=stopped enabled=no
+  when: squid3_init_path is defined and squid3_init_path.stat.exists and disable_squid_server == "yes"
+  tags:
+    - notscored
+    - section6.13
+
+- name: 6.14 Ensure SNMP Server is not enabled (Not Scored)
+  stat: path=/etc/init/snmpd.conf follow=True
+  register: snmpd_init_path
+  tags:
+    - notscored
+    - section6.14
+
+- name: 6.14 Ensure SNMP Server is not enabled (Not Scored)
+  service: name=snmpd state=stopped enabled=no
+  when: snmpd_init_path is defined and snmpd_init_path.stat.exists
+  tags:
+    - notscored
+    - section6.14
+
+- name: 6.15 Configure Mail Transfer Agent for Local-Only Mode (Scored)
+  stat: path=/etc/postfix/main.cf follow=True
+  register: postfix_config
+  tags:
+    - scored
+    - section6.15
+
+- name: 6.15 Configure Mail Transfer Agent for Local-Only Mode (Scored)
+  lineinfile: regexp="^inet_interfaces" line="inet_interfaces = localhost" dest=/etc/postfix/main.cf state=present
+  when: postfix_config is defined and postfix_config.stat.exists
+  notify:
+    - restart postfix
+  tags:
+    - scored
+    - section6.15
+
+- name: 6.16 Ensure rsync service is not enabled (Scored)
+  stat: path=/etc/default/rsync follow=True
+  register: rsync_config
+  tags:
+    - scored
+    - section6.16
+
+- name: 6.16 Ensure rsync service is not enabled (Scored)
+  lineinfile: regexp="^RSYNC_ENABLE" line="RSYNC_ENABLE=false" dest=/etc/default/rsync state=present
+  when: rsync_config is defined and rsync_config.stat.exists
+  tags:
+    - scored
+    - section6.16
+
+- name: 6.17 Ensure Biosdevname is not enabled (Scored)
+  apt: name=biosdevname purge=yes state=absent
+  tags:
+    - scored
+    - section6.17
+
+# vim: set sw=2 ts=2:

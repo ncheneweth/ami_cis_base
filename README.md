@@ -11,4 +11,10 @@ rake validate
 The rakefile is setup to update the Vagrant box used here as well (which is
   why there a Vagrant file here as well)
 
-## Packer build - (to be completed)
+## Packer build
+
+to build the ami:
+
+packer build packer.json
+
+The file manifest.json will contain the ami id created

@@ -1,8 +1,8 @@
 ---
-- name: wrapper playbook for kitchen testing of the cis setup
+- name: provisioning playbook for AMI instance
   hosts: all
-  become: yes
-  user: provisioner
+  become: sudo
+  become_user: ubuntu
   tags:
     - level-2
   roles:

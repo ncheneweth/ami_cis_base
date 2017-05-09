@@ -1,0 +1,9 @@
+---
+- name: wrapper playbook for kitchen testing of the cis setup
+  hosts: all
+  become: yes
+  user: provisioner
+  tags:
+    - level-2
+  roles:
+    - { role: cis, when: ansible_distribution=="Ubuntu" and ansible_distribution_version=="14.04" }

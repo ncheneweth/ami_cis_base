@@ -6,4 +6,4 @@
   tags:
     - level-2
   roles:
-    - { role: ami_cis_base, when: ansible_distribution=="Ubuntu" and ansible_distribution_version=="14.04" }
+    - { role: cis, when: ansible_distribution=="Ubuntu" and ansible_distribution_version=="14.04" }

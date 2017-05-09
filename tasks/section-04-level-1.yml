@@ -9,6 +9,18 @@
 
 - name: 4.1 Restrict Core Dumps (Scored) - using sysctl
   sysctl: name=fs.suid_dumpable value=0 ignoreerrors=yes sysctl_set=yes reload=yes state=present
+  notify: reload sysctl
+  tags:
+    - scored
+    - section4.1
+
+- name: 4.1 Restrict Core Dumps (Scored) - remove apport and whoopsie
+  apt:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+    - whoopsie
+    - apport
   tags:
     - scored
     - section4.1
@@ -50,7 +62,9 @@
   with_items:
     - apparmor
     - apparmor-utils
-  notify: enforce apparmor profiles
+  notify:
+    - enforce apparmor profiles
+    - restart rsyslog
   tags:
     - scored
     - section4.5

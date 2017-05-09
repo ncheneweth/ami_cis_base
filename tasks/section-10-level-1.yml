@@ -54,7 +54,7 @@
     - section10.4
 
 - name: 10.5 Lock Inactive User Accounts (Scored)
-  debug: msg="*** Evaluate your infrastructure first, before locking inactive accounts"
+  command: useradd -D -f 35
   tags:
     - scored
     - section10.5

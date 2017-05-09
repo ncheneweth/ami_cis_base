@@ -178,7 +178,7 @@
     - section9.3.10
 
 - name: 9.3.11 Use Only Approved Cipher in Counter Mode (Scored)
-  lineinfile: dest=/etc/ssh/sshd_config regexp="^Ciphers" line="Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes128-ctr" state=present
+  lineinfile: dest=/etc/ssh/sshd_config regexp="^Ciphers" line="Ciphers aes128-ctr,aes192-ctr,aes256-ctr" state=present
   notify: restart ssh
   tags:
     - scored

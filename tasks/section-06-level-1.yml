@@ -100,7 +100,10 @@
     - section6.7
 
 - name: 6.7 Ensure NFS and RPC are not enabled (Not Scored)
-  service: name=rpcbind state=stopped enabled=no
+  replace:
+        dest: /etc/init/rpcbind-boot.conf
+        regexp: '^start on virtual-filesystems and net-device-up IFACE=lo'
+        replace: '#start on virtual-filesystems and net-device-up IFACE=lo'
   when: rpcbind_init_path is defined and rpcbind_init_path.stat.exists
   tags:
     - notscored

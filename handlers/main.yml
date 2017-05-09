@@ -28,4 +28,12 @@
 - name: enforce apparmor profiles
   shell: aa-enforce /etc/apparmor.d/*
 
+- name: reload sysctl
+  command: sysctl -p
+
+- name: restart ufw
+  ufw: state=restarted
+
+- name: update grub_path
+  command: update-grub
 # vim: set sw=2 ts=2:

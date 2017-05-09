@@ -48,9 +48,9 @@
     - section8.1.1
     - section8.1.1.3
 
-#TODO: find a way to append at the end of a line
 - name: 8.1.3 Enable Auditing for Processes That Start Prior to auditd (Scored)
-  debug: msg="***  Adjusting bootloader configurations on production machines can be destructive."
+  lineinfile: dest="/etc/default/grub" regexp="^GRUB_CMDLINE_LINUX=\"\"" line="GRUB_CMDLINE_LINUX=\"audit=1\""
+  notify: update grub_path
   tags:
     - scored
     - section8.1.3
@@ -85,7 +85,7 @@
   lineinfile: dest=/etc/audit/audit.rules line="{{item}}" insertafter=EOF state=present
   with_items:
     - "-w /etc/group -p wa -k identity"
-    - "w /etc/passwd -p wa -k identity"
+    - "-w /etc/passwd -p wa -k identity"
     - "-w /etc/gshadow -p wa -k identity"
     - "-w /etc/shadow -p wa -k identity"
     - "-w /etc/security/opasswd -p wa -k identity"
@@ -182,14 +182,10 @@
 - name: 8.1.11 Collect Unsuccessful Unauthorized Access Attempts to Files (Scored)
   lineinfile: dest=/etc/audit/audit.rules line="{{item}}" insertafter=EOF state=present
   with_items:
-    - "-a always,exit -F arch=b64 -S creat -S open -S openat -S truncate"
-    - "-F exit=-EACCES -F auid>=500 -F auid!=4294967295 -k access"
-    - "-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate"
-    - "-F exit=-EACCES -F auid>=500 -F auid!=4294967295 -k access"
-    - "-a always,exit -F arch=b64 -S creat -S open -S openat -S truncate"
-    - "-F exit=-EPERM -F auid>=500 -F auid!=4294967295 -k access"
-    - "-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate"
-    - "-F exit=-EPERM -F auid>=500 -F auid!=4294967295 -k access"
+    - "-a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=500 -F auid!=4294967295 -k access"
+    - "-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=500 -F auid!=4294967295 -k access"
+    - "-a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EPERM -F auid>=500 -F auid!=4294967295 -k access"
+    - "-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EPERM -F auid>=500 -F auid!=4294967295 -k access"
   when: ansible_machine == "x86_64"
   notify: restart auditd
   tags:
@@ -208,8 +204,16 @@
     - section8.1.11
 
 - name: 8.1.12 Collect Use of Privileged Commands (Scored)
-  shell: /bin/find {/usr/local/sbin,/usr/local/bin,/sbin,/bin,/usr/sbin,/usr/bin} -xdev \( -perm -4000 -o -perm -2000 \) -type f | awk '{print "-a always,exit -F path=" $1 " -F perm=x -F auid>=500 -F auid!=4294967295 -k privileged" }'
+  shell: /usr/bin/find {/usr/local/sbin,/usr/local/bin,/sbin,/bin,/usr/sbin,/usr/bin,/usr/lib} -xdev \( -perm -4000 -o -perm -2000 \) -type f | awk '{print "-a always,exit -F path=" $1 " -F perm=x -F auid>=500 -F auid!=4294967295 -k privileged" }'
+  args:
+    executable: /bin/bash
   register: privileged_programs
+  tags:
+    - scored
+    - section8.1.12
+
+- name: 8.1.12 Collect Use of Privileged Commands - DEBUG
+  debug: var=privileged_programs.stdout_lines
   tags:
     - scored
     - section8.1.12
@@ -218,6 +222,17 @@
   lineinfile: dest=/etc/audit/audit.rules line="{{item}}" insertafter=EOF state=present
   with_items: "{{ privileged_programs.stdout_lines }}"
   when: privileged_programs is defined and privileged_programs.stdout_lines|length > 0
+  notify: restart auditd
+  tags:
+    - scored
+    - section8.1.12
+
+- name: 8.1.12 Collect Use of Privileged Commands (Score) - Hard coded
+  lineinfile: dest=/etc/audit/audit.rules line="{{item}}" insertafter=EOF state=present
+  with_items:
+    - "-a always,exit -F path=/usr/sbin/postqueue -F perm=x -F auid>=500 -F auid!=4294967295 -k privileged"
+    - "-a always,exit -F path=/usr/sbin/postdrop -F perm=x -F auid>=500 -F auid!=4294967295 -k privileged"
+  when: ansible_machine == "x86_64"
   notify: restart auditd
   tags:
     - scored
@@ -379,7 +394,7 @@
     - section8.3.1
 
 - name: 8.3.2 Implement Periodic Execution of File Integrity (Scored)
-  copy: src=aide/aide.cron dest=/etc/cron.daily/aide.cron owner=root group=root mode=0755
+  copy: src=aide/aide.cron dest=/etc/cron.daily/aide owner=root group=root mode=0755
   tags:
     - scored
     - section8.3

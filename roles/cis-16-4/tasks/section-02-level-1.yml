@@ -1,0 +1,11 @@
+---
+# file: tasks/section-02-level-2.yml
+
+- name: 2.2.1.1 Ensure time synchronization is in use (Not Scored)
+  apt: name="{{ item }}" update_cache=yes state=present
+  with_items:
+    - ntp
+    # - chrony
+  tags:
+    - notscored
+    - section2.1.1

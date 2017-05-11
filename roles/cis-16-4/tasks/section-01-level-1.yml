@@ -1,0 +1,83 @@
+---
+# file: tasks/section-01.yml
+
+- name: 1.1 Install Updates, Patches and Additional Security Software (Not Scored)
+  apt: upgrade=dist update_cache=yes
+  tags:
+    - notscored
+    - section1.1
+
+- name: 1.1.1 Disable unused filesystems
+  lineinfile: dest=/etc/modprobe.d/CIS.conf line="{{item}}" insertafter=EOF state=present create=true
+  with_items:
+    - "install cramfs /bin/true"
+    - "install freevxfs /bin/true"
+    - "install jffs2 /bin/true"
+    - "install hfs /bin/true"
+    - "install hfsplus /bin/true"
+    - "install squashfs /bin/true"
+    - "install udf /bin/true"
+    - "install vfat /bin/true"
+  tags:
+    - scored
+    - section1.1.1
+# disabled until seperate mounts are in place
+# - name: 1.1.3 Ensure nodev option set on /tmp partition (Scored)
+# - name: 1.1.4 Ensure nosuid option set on /tmp partition (Scored)
+# - name: 1.1.7 Ensure nodev option set on /var/tmp partition (Scored)
+# - name: 1.1.8 Ensure nosuid option set on /var/tmp partition (Scored)
+# - name: 1.1.9 Ensure noexec option set on /var/tmp partition (Scored)
+# - name: 1.1.13 Ensure nodev option set on /home partition (Scored)
+# - name: Ensure nodev option set on /dev/shm partition (Scored)
+# - name: 1.1.15 Ensure nosuid option set on /dev/shm partition (Scored)
+# - name: 1.1.16 Ensure noexec option set on /dev/shm partition (Scored)
+
+- name: 1.3.1 Ensure AIDE is installed (Scored)
+  apt: name=aide update_cache=yes state=present
+  notify: initialize aide
+  tags:
+    - scored
+    - section1.3
+    - section1.3.1
+- name: 1.3.2 Ensure filesystem integrity is regularly checked (Scored)
+  cron:
+    name: aide check
+    minute: 0
+    hour: 5
+    user: root
+    job: "/usr/bin/aide --check"
+    cron_file: aide
+  tags:
+    - scored
+    - section1.3
+    - section1.3.2
+- name: 1.4.1 Ensure permissions on bootloader config are configured (Scored)
+  shell: chown root:root /boot/grub/grub.cfg; chmod og-rwx /boot/grub/grub.cfg
+  tags:
+    - scored
+    - section1.4
+    - section1.4.1
+- name: 1.5.1 Ensure core dumps are restricted /etc/security/limits.d/core-dump.conf (Scored)
+  lineinfile: dest=/etc/security/limits.d/core-dump.conf line="* hard core 0" insertafter=EOF state=present create=true
+  tags:
+    - scored
+    - section1.5
+    - section1.5.1
+- name: 1.5.1 Ensure core dumps are restricted sysctl (Scored)
+  lineinfile: dest=/etc/sysctl.conf line="fs.suid_dumpable = 0" insertafter=EOF state=present create=true
+  notify: limit core dumps realtime
+  tags:
+    - scored
+    - section1.5
+    - section1.5.1
+- name: 1.7.1 Command Line Warning Banners
+  copy: src={{ item.src }} dest={{ item.dest }} owner=root group=root mode=0644
+  with_items:
+    - { src: "issue.net", dest: "/etc/issue.net" }
+    - { src: "motd", dest: "/etc/motd" }
+  tags:
+    - scored
+    - section1.7.1
+
+
+# vim: set sw=2 ts=2:

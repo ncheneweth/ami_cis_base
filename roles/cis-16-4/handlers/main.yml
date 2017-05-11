@@ -1,0 +1,48 @@
+---
+# file: handlers/main.yml
+
+- name: restart postfix
+  service: name=postfix state=restarted enabled=yes
+
+- name: flush routing cache
+  shell: echo 1 > /proc/sys/net/ipv4/route/flush
+
+- name: flush ipv6 routing cache
+  shell: echo 1 > /proc/sys/net/ipv6/route/flush
+
+- name: update grub
+  command: /usr/sbin/update-grub
+
+- name: restart auditd
+  service: name=auditd state=restarted
+
+- name: restart rsyslog
+  service: name=rsyslog state=restarted
+
+
+- name: enforce apparmor profiles
+  shell: aa-enforce /etc/apparmor.d/*
+
+- name: limit core dumps realtime
+  command: sysctl -w fs.suid_dumpable=0
+
+- name: restart ufw
+  ufw: state=restarted
+
+- name: update grub_path
+  command: update-grub
+
+# verified used in 16.04
+- name: initialize aide
+  shell: aideinit -y && cp -f /var/lib/aide/aide.db.new /var/lib/aide/aide.db
+
+- name: reload sysctl
+  command: sysctl -p
+
+- name: update iptables
+  shell: iptables-save > /etc/iptables/rules.v4
+
+- name: restart ssh
+  service: name=ssh state=restarted
+
+# vim: set sw=2 ts=2:

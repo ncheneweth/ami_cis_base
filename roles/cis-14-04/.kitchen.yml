@@ -17,10 +17,10 @@ verifier:
   name: inspec
 
 platforms:
-  - name: ubuntu-14.04
+  - name: ubuntu-16.10 
     driver_plugin: vagrant
     driver_config:
-      box: ubuntu/trusty64
+      box: bento/ubuntu-16.10
 
 suites:
   - name: default

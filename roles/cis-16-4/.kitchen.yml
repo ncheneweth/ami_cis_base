@@ -1,0 +1,26 @@
+---
+driver:
+  name: vagrant
+
+provisioner:
+  hosts: test-kitchen
+  name: ansible_playbook
+  # Use el7 epel repo instead of the default el6
+  ansible_yum_repo: "https://download.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm"
+  require_chef_for_busser: false
+  require_ruby_for_busser: false
+  ansible_verbosity: 2
+  ansible_verbose: true
+  # starting playbook is at: test/integration/default/default.yml
+
+verifier:
+  name: inspec
+
+platforms:
+  - name: ubuntu-16.04
+    driver_plugin: vagrant
+    driver_config:
+      box: bento/ubuntu-16.04 
+
+suites:
+  - name: default

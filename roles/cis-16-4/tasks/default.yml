@@ -6,4 +6,4 @@
   tags:
     - level-2
   roles:
-    - { role: cis, when: ansible_distribution=="Ubuntu" and ansible_distribution_version=="14.04" }
+    - cis

@@ -18,6 +18,6 @@ if __name__ == "__main__":
         print("failed to find previous ami in bootstrap2-manifest.json")
 
     try:
-        subprocess.run(['/usr/local/bin/packer','build','-var','region='+artifact[0],'-var','parent_ami_id='+artifact[1],os.getcwd() + '/builders/bootstrap1.json'], check=True)
+        subprocess.run(['/usr/local/bin/packer','build','-var','region='+artifact[0],'-var','parent_ami_id='+artifact[1],os.getcwd() + '/builders/bootstrap2.json'], check=True)
     except subprocess.CalledProcessError as err:
         print('ERROR:', err)

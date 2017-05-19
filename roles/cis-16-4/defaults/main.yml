@@ -122,4 +122,6 @@ allowed_suid_binaries: []
 # 12.11 Find SGID System Executables (Not Scored)
 allowed_sgid_binaries: []
 
+#4.1.1.1
+max_log_file: 500
 # vim: set sw=2 ts=2:

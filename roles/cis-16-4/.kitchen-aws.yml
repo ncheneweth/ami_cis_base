@@ -1,6 +1,13 @@
 ---
 driver:
-  name: vagrant
+  name: ec2
+  aws_ssh_key_id: rchawla-bootstrap
+  security_group_ids: ["sg-00ea6e7e"]
+  region: us-east-1
+  availability_zone: b
+  require_chef_omnibus: true
+  instance_type: t1.micro
+  associate_public_ip: true
 
 provisioner:
   hosts: test-kitchen
@@ -17,10 +24,12 @@ verifier:
   name: inspec
 
 platforms:
-  - name: ubuntu-14.04
-    driver_plugin: vagrant
-    driver_config:
-      box: bento/ubuntu-14.04
-
+  - name: aws-ubuntu-16.04
+    driver_plugin: ec2
+    driver:
+      image_id: ami-4a83175c
+    transport:
+      ssh_key: ~/.ssh/rchawla-bootstrap
+      username: ubuntu
 suites:
   - name: default

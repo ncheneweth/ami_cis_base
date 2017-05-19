@@ -1,0 +1,33 @@
+- name: 1.6.1 Configure SELinux
+  debug: msg="** Configure SELinux for Level 2"
+  tags:
+    - scored
+    - section1.6
+    - section1.6.1
+
+- name: 1.6.1.2 Ensure the SELinux state is enforcing (Scored)
+  lineinfile: dest="/etc/selinux/config" line="SELINUX=enforcing" insertafter=EOF state=present create=true
+  tags:
+    - scored
+    - section1.6.1
+    - section1.6.1.2
+
+- name: 1.6.1.3 Ensure SELinux policy is configured (Scored)
+  lineinfile: dest="/etc/selinux/config" line="SELINUXTYPE=ubuntu" insertafter=EOF state=present create=true
+  tags:
+    - scored
+    - section1.6.1
+    - section1.6.1.3
+
+- name: 1.6.2 Configure AppArmor
+  debug: msg="*** configure AppArmor"
+  tags:
+    - scored
+    - section1.6.2
+
+- name: 1.6.2.2 Ensure all AppArmor Profiles are enforcing (Scored)
+  command: aa-enforce /etc/apparmor.d/*
+  tags:
+    - scored
+    - section1.6.2
+    - section1.6.2.2

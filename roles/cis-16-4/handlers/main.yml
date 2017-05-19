@@ -1,8 +1,7 @@
 ---
 # file: handlers/main.yml
 
-- name: restart postfix
-  service: name=postfix state=restarted enabled=yes
+
 
 - name: flush routing cache
   shell: echo 1 > /proc/sys/net/ipv4/route/flush
@@ -13,11 +12,6 @@
 - name: update grub
   command: /usr/sbin/update-grub
 
-- name: restart auditd
-  service: name=auditd state=restarted
-
-- name: restart rsyslog
-  service: name=rsyslog state=restarted
 
 
 - name: enforce apparmor profiles
@@ -28,9 +22,6 @@
 
 - name: restart ufw
   ufw: state=restarted
-
-- name: update grub_path
-  command: update-grub
 
 # verified used in 16.04
 - name: initialize aide
@@ -44,5 +35,17 @@
 
 - name: restart ssh
   service: name=ssh state=restarted
+
+- name: restart postfix
+  service: name=postfix state=restarted enabled=yes
+
+- name: update grub_path
+  command: update-grub
+
+- name: restart auditd
+  service: name=auditd state=restarted
+
+- name: restart rsyslog
+  command: pkill -HUP rsyslogd
 
 # vim: set sw=2 ts=2:

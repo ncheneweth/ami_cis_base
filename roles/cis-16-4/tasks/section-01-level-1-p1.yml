@@ -1,0 +1,8 @@
+# Create a new primary partition for LVM
+- name: remove old dirs from original setupcon
+  file: dest="{{ item }}" state="absent"
+  with_items:
+    - /var/log.old
+    - /var.old
+    - /home.old
+    

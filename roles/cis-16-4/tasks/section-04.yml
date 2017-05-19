@@ -6,9 +6,9 @@
 #     - level-1
 #     - section4-level-1
 
-# - include: section-04-level-2.yml
-#   tags:
-#     - level-2
-#     - section4-level-2
+- include: section-04-level-2.yml
+  tags:
+    - level-2
+    - section4-level-2
 
 # vim: set sw=4 ts=4:

@@ -1,0 +1,1 @@
+#!/bin/bashfor dir in `/bin/cat /etc/passwd | /bin/egrep -v '(root|halt|sync|shutdown)' | /usr/bin/awk -F: '($7 != "/usr/sbin/nologin") { print $6 }'`; do    if [ -d $dir ]; then    chmod 750 $dirfi done

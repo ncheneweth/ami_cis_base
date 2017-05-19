@@ -1,0 +1,64 @@
+{
+	"variables": {
+		"region": "us-east-1",
+		"buildtime": "{{ isotime \"2006-01-02-1504\" }}",
+		"creator": "rchawla-bootstrap"
+	},
+	"builders": [{
+		"type": "amazon-ebs",
+		"region": "{{ user `region` }}",
+		"spot_price_auto_product": "Linux/UNIX (Amazon VPC)",
+		"source_ami_filter": {
+			"filters": {
+				"virtualization-type": "hvm",
+				"name": "*ubuntu-xenial-16.04-amd64-server-*",
+				"root-device-type": "ebs"
+			},
+			"most_recent": true
+		},
+		"instance_type": "t2.micro",
+		"ssh_username": "ubuntu",
+		"ami_name": "min-vol-unbuntu-16.04-{{timestamp}}",
+		"ami_block_device_mappings": [{
+			"device_name": "/dev/sda1",
+			"volume_size": 12,
+			"volume_type": "gp2",
+			"delete_on_termination": true
+		}],
+		"launch_block_device_mappings": [{
+			"device_name": "/dev/sda1",
+			"volume_size": 8,
+			"volume_type": "gp2",
+			"delete_on_termination": true
+		}],
+		"run_tags": {
+			"Name": "Packer Builder - min-vol-unbuntu-16.04",
+			"Project": "di-bootstrap",
+			"creator": "{{ user `creator` }}"
+		},
+		"run_volume_tags": {
+			"Name": "Packer Builder - min-vol-unbuntu-16.04",
+			"Project": "di-bootstrap",
+			"creator": "{{ user `creator` }}"
+		},
+		"tags": {
+			"Name": "min-vol-unbuntu-16.04-{{timestamp}}",
+			"BuildTime": "{{ user `buildtime` }}",
+			"creator": "{{ user `creator` }}"
+		}
+	}],
+	"provisioners": [{
+		"type": "shell",
+		"inline": [
+			"while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 1; done"
+		]
+	}, {
+		"type": "shell",
+		"inline": ["sudo touch /etc/growroot-disabled"]
+	}],
+	"post-processors": [{
+		"type": "manifest",
+		"output": "bootstrap1-manifest.json",
+		"strip_path": true
+	}]
+}

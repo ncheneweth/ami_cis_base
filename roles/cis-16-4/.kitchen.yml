@@ -1,6 +1,13 @@
 ---
 driver:
-  name: vagrant
+  name: ec2
+  aws_ssh_key_id: rchawla-bootstrap
+  security_group_ids: ["sg-00ea6e7e"]
+  region: us-east-1
+  availability_zone: a
+  require_chef_omnibus: true
+  instance_type: t2.micro
+  associate_public_ip: true
 
 provisioner:
   hosts: test-kitchen
@@ -11,16 +18,25 @@ provisioner:
   require_ruby_for_busser: false
   ansible_verbosity: 2
   ansible_verbose: true
+  ansible_extra_flags: <%= ENV['ANSIBLE_EXTRA_FLAGS'] %>
   # starting playbook is at: test/integration/default/default.yml
 
 verifier:
   name: inspec
 
 platforms:
-  - name: ubuntu-16.04
-    driver_plugin: vagrant
-    driver_config:
-      box: bento/ubuntu-16.04 
+  - name: aws-ubuntu-16.04
+    driver:
+      image_id: ami-1fd5ad09
+      block_device_mappings:
+        - device_name: /dev/sda1
+          ebs:
+            volume_type: gp2
+            volume_size: 100
+            delete_on_termination: true
+    transport:
+      ssh_key: /Users/ranbir/.ssh/rchawla-bootstrap
+      username: ubuntu
 
 suites:
   - name: default

@@ -33,7 +33,7 @@
     - section5.1.4
 - name: 5.1.5 Ensure permissions on /etc/cron.weekly are configured (Scored)
   file:
-    path: /etc/cron.daily
+    path: /etc/cron.weekly
     owner: root
     group: root
     mode: 0600
@@ -173,48 +173,166 @@
     - section5.2
     - section5.2.10
 
+# - name: 5.2.11 Ensure only approved MAC algorithms are used (Scored)
+#   lineinfile: dest=/etc/ssh/sshd_config regexp="^Ciphers" line="Ciphers aes128-ctr,aes192-ctr,aes256-ctr" state=present
+#   notify: restart ssh
+#   tags:
+#     - scored
+#     - section5.2
+#     - section5.2.11
+
 - name: 5.2.11 Ensure only approved MAC algorithms are used (Scored)
-  lineinfile: dest=/etc/ssh/sshd_config regexp="^Ciphers" line="Ciphers aes128-ctr,aes192-ctr,aes256-ctr" state=present
+  lineinfile: dest=/etc/ssh/sshd_config line="{{item}}" state=present insertafter=EOF
+  with_items:
+    - "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com"
+    - "KexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256,diffie-hellman-group14-sha1,diffie-hellman-group-exchange-sha1"
   notify: restart ssh
   tags:
     - scored
     - section5.2
     - section5.2.11
 
-# - name: 5.2.11 Ensure only approved MAC algorithms are used (Scored)
-#   lineinfile: dest=/etc/ssh/sshd_config line="{{item}}" state=present insertafter=EOF
-#   with_items:
-#     - "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com,curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256,hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com"
-#     - "KexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256,diffie-hellman-group14-sha1,diffie-hellman-group-exchange-sha1"
-#   notify: restart ssh
-#   tags:
-#     - scored
-#     - section5.2
-#     - section5.2.11
-#
-# - name: 5.2.12 Ensure SSH Idle Timeout Interval is configured (Scored)
-#   lineinfile: dest=/etc/ssh/sshd_config regexp={{ item.regex }} line="{{item.line}}" state=present
-#   with_items:
-#     - { regex: "^ClientAliveInterval", line: "ClientAliveInterval 300" }
-#     - { regex: "^ClientAliveCountMax", line: "ClientAliveCountMax 0" }
-#   notify: restart ssh
-#   tags:
-#     - scored
-#     - section5.2
-#     - section5.2.12
-#
-# - name: 5.2.13 Ensure SSH LoginGraceTime is set to one minute or less (Scored)
-#   lineinfile: dest=/etc/ssh/sshd_config regexp="^LoginGraceTime" line="LoginGraceTime 60" state=present
-#   notify: restart ssh
-#   tags:
-#     - scored
-#     - section5.2
-#     - section5.2.13
-#
-# - name: 5.2.15 Ensure SSH warning banner is configured (Scored)
-#   lineinfile: dest=/etc/ssh/sshd_config line="Banner /etc/issue.net" state=present insertafter=EOF
-#   notify: restart ssh
-#   tags:
-#     - scored
-#     - sectiop5.2.
-#     - section5.2.14
+- name: 5.2.12 Ensure SSH Idle Timeout Interval is configured (Scored)
+  lineinfile: dest=/etc/ssh/sshd_config regexp={{ item.regex }} line="{{item.line}}" state=present
+  with_items:
+    - { regex: "^ClientAliveInterval", line: "ClientAliveInterval 300" }
+    - { regex: "^ClientAliveCountMax", line: "ClientAliveCountMax 0" }
+  notify: restart ssh
+  tags:
+    - scored
+    - section5.2
+    - section5.2.12
+
+- name: 5.2.13 Ensure SSH LoginGraceTime is set to one minute or less (Scored)
+  lineinfile: dest=/etc/ssh/sshd_config regexp="^LoginGraceTime" line="LoginGraceTime 60" state=present
+  notify: restart ssh
+  tags:
+    - scored
+    - section5.2
+    - section5.2.13
+
+- name: 5.2.15 Ensure SSH warning banner is configured (Scored)
+  lineinfile: dest=/etc/ssh/sshd_config line="Banner /etc/issue.net" state=present insertafter=EOF
+  notify: restart ssh
+  tags:
+    - scored
+    - sectiop5.2.
+    - section5.2.14
+
+- name: 5.3 Configure PAM
+  debug: msg="*** Configure PAM"
+  tags:
+    - section5.3
+
+- name: 5.3.1 Ensure password creation requirements are configured (Scored)
+  apt: name=libpam-pwquality update_cache=yes  state=installed
+  tags:
+    - scored
+    - section5.3
+    - section5.3.1
+
+- name: 5.3.1 Ensure password creation requirements are configured (Scored)
+  lineinfile: name="/etc/security/pwquality.conf" line="{{ item }}" state=present insertafter=EOF
+  with_items:
+    - minlen=14
+    - dcredit=-1
+    - ucredit=-1
+    - ocredit=-1
+    - lcredit=-1
+  tags:
+    - scored
+    - section5.3
+    - section5.3.1
+
+- name: 5.3.1,5.3.3,5.3.4 Ensure password creation requirements are configured (Scored)
+  copy: src=pam.d/common-password dest=/etc/pam.d/common-password owner=root group=root mode=0644
+  tags:
+    - scored
+    - section5.3
+    - section5.3.1
+    - section5.3.3
+    - section5.3.4
+
+- name: 5.3.2 Ensure lockout for failed password attempts is configured (Not Scored)
+  lineinfile: dest=/etc/pam.d/login line="auth required pam_tally2.so onerr=fail audit silent deny=5 unlock_time=900" insertbefore=BOF
+  tags:
+    - notscored
+    - section5.3
+    - section5.3.2
+
+- name: 5.4 User Accounts and Environment
+  debug: msg="*** Configure User Accounts and Environment"
+  tags:
+    - section5.4
+
+- name: 5.4.1.1 Ensure password expiration is 90 days or less (Scored)
+  lineinfile: dest=/etc/login.defs regexp="^PASS_MAX_DAYS" line="PASS_MAX_DAYS {{ pass_max_days }}" state=present
+  tags:
+    - scored
+    - section5.4
+    - section5.4.1.1
+
+- name: 5.4.1.2 Ensure minimum days between password changes is 7 or more
+  lineinfile: dest=/etc/login.defs regexp="^PASS_MIN_DAYS" line="PASS_MIN_DAYS {{ pass_min_days }}" state=present
+  tags:
+    - scored
+    - section5.4
+    - section5.4.1.2
+
+- name: 5.4.1.3 Ensure password expiration warning days is 7 or more (Scored)
+  lineinfile: dest=/etc/login.defs regexp="^PASS_WARN_AGE" line="PASS_WARN_AGE {{ pass_warn_age }}" state=present
+  tags:
+    - scored
+    - section5.4
+    - section5.4.1.3
+
+- name: 5.4.1.4 Ensure inactive password lock is 30 days or less (Scored)
+  command: useradd -D -f 30
+  tags:
+    - scored
+    - section5.4
+    - section5.4.1.3
+
+- name: 5.4.2 Ensure system accounts are non-login (Scored)
+  copy: src=disable_system_accounts.sh dest=/root/disable_system_accounts.sh owner=root group=root mode=0700
+  when: disable_system_accounts == "no"
+  tags:
+    - scored
+    - section5.4
+    - section5.4.2
+
+- name: 5.4.2 Ensure system accounts are non-login (Scored)
+  shell: /bin/bash /root/disable_system_accounts.sh
+  when: disable_system_accounts == "no"
+  tags:
+    - scored
+    - section5.4
+    - section5.4.2
+- name: 5.4.3 Ensure default group for the root account is GID 0 (Scored)
+  command: usermod -g 0 root
+  tags:
+    - scored
+    - section5.4
+    - section5.4.3
+- name: 5.4.4 Ensure default user umask is 027 or more restrictive (Scored)
+  lineinfile: dest=/etc/login.defs regexp="^UMASK" line="UMASK 077" state=present
+  tags:
+    - scored
+    - section5.4
+    - section5.4.4
+
+- name: 5.4.4 Ensure default user umask is 027 or more restrictive (Scored)
+  lineinfile: dest="{{item}}" line="umask 027" state=present  insertafter=EOF
+  with_items:
+    - /etc/profile
+    - /etc/bash.bashrc
+  tags:
+    - scored
+    - section5.4
+    - section5.4.4
+
+- name: 5.6 Ensure access to the su command is restricted (Scored)
+  lineinfile: dest=/etc/pam.d/su line="auth required pam_wheel.so use_uid" state=present insertafter=EOF
+  tags:
+    - scored
+    - section5.6

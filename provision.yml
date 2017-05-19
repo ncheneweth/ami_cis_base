@@ -1,9 +1,11 @@
 ---
 - name: provisioning playbook for AMI instance
   hosts: all
-  become: sudo
-  become_user: ubuntu
+  remote_user: ubuntu
+  become: true
+  become_method: sudo
+  become_user: root
   tags:
     - level-2
   roles:
-    - { role: cis, when: ansible_distribution=="Ubuntu" and ansible_distribution_version=="14.04" }
+    - { role: cis-16-4, when: ansible_distribution=="Ubuntu" and ansible_distribution_version=="16.04" }

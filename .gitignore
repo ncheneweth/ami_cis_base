@@ -1,6 +1,7 @@
 .DS_Store
 .kitchen
 .vagrant
-manifest.json
+manifest*.json
 *.box
 *.retry
+*.pem

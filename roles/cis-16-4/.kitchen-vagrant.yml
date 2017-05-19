@@ -1,6 +1,6 @@
 ---
 driver:
-  name: vagrant
+  name: ec2
 
 provisioner:
   hosts: test-kitchen
@@ -17,10 +17,10 @@ verifier:
   name: inspec
 
 platforms:
-  - name: ubuntu-14.04
-    driver_plugin: vagrant
-    driver_config:
-      box: bento/ubuntu-14.04
+  - name: ubuntu-16.04
+    driver_plugin: ec2
+    driver:
+      image_id: ami-c5ac38d3
 
 suites:
   - name: default

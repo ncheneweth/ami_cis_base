@@ -1,0 +1,466 @@
+- name: 6.1.2 Ensure permissions on /etc/passwd are configured (Scored)
+  file: name="/etc/passwd" owner="root" group="root" mode="0644"
+  tags:
+    - scored
+    - section6.1
+    - section6.1.2
+- name: 6.1.3 Ensure permissions on /etc/shadow are configured (Scored)
+  file: name="/etc/shadow" owner="root" group="shadow" mode="0640"
+  tags:
+    - scored
+    - section6.1
+    - section6.1.3
+- name: 6.1.4 Ensure permissions on /etc/group are configured (Scored)
+  file: name="/etc/group" owner="root" group="root" mode="0644"
+  tags:
+    - scored
+    - section6.1
+    - section6.1.4
+- name: 6.1.5 Ensure permissions on /etc/gshadow are configured (Scored)
+  file: name="/etc/gshadow" owner="root" group="shadow" mode="0640"
+  tags:
+    - scored
+    - section6.1
+    - section6.1.5
+- name: 6.1.6 Ensure permissions on /etc/passwd- are configured (Scored)
+  file: name="/etc/passwd-" owner="root" group="root" mode="0600"
+  tags:
+    - scored
+    - section6.1
+    - section6.1.6
+- name: 6.1.7 Ensure permissions on /etc/shadow- are configured (Scored)
+  file: name="/etc/shadow-" owner="root" group="root" mode="0600"
+  tags:
+    - scored
+    - section6.1
+    - section6.1.7
+- name: 6.1.8 Ensure permissions on /etc/group- are configured (Scored)
+  file: name="/etc/shadow-" owner="root" group="root" mode="0600"
+  tags:
+    - scored
+    - section6.1
+    - section6.1.8
+- name: 6.1.9 Ensure permissions on /etc/gshadow- are configured (Scored)
+  file: name="/etc/gshadow-" owner="root" group="root" mode="0600"
+  tags:
+    - scored
+    - section6.1
+    - section6.1.9
+- name: 6.1.10 Ensure no world writable files exist (Scored)
+  debug: msg="need to test first - may be only auditable"
+  tags:
+    - scored
+    - section6.1
+    - section6.1.10
+
+- name: 6.1.11 Ensure no unowned files or directories exist (Scored)
+  debug: msg="need to test first - may be only auditable"
+  tags:
+    - scored
+    - section6.1
+    - section6.1.11
+
+- name: 6.2 User and Group Settings
+  debug: msg="*** 6.2 User and Group Settings"
+  tags:
+    - section6.2
+
+- name: 6.2.1 Ensure password fields are not empty (Scored)
+  shell: /bin/cat /etc/shadow | /usr/bin/awk -F':' '($2 == "" ) { print $1 " does not have a password "}'
+  register: command_result
+  failed_when: 'command_result.stdout != ""'
+  tags:
+    - scored
+    - section6.2
+    - section6.2.1
+    - manual_remediation
+
+- name: 6.2.2 Ensure no legacy "+" entries exist in /etc/passwd (Scored)
+  shell: /bin/grep '^+:' /etc/passwd
+  register: command_result
+  failed_when: 'command_result.stdout != ""'
+  tags:
+    - scored
+    - section6.2
+    - section6.2.2
+    - manual_remediation
+
+- name: 6.2.3 Ensure no legacy "+" entries exist in /etc/shadow (Scored)
+  shell: /bin/grep '^+:' /etc/shadow
+  register: command_result
+  failed_when: 'command_result.stdout != ""'
+  tags:
+    - scored
+    - section6.2
+    - section6.2.3
+    - manual_remediation
+
+- name: 6.2.4 Ensure no legacy "+" entries exist in /etc/group (Scored)
+  shell: /bin/grep '^+:' /etc/group
+  register: command_result
+  failed_when: 'command_result.stdout != ""'
+  tags:
+    - scored
+    - section6.2
+    - section6.2.4
+    - manual_remediation
+
+- name: 6.2.5 Ensure root is the only UID 0 account (Scored)
+  shell: /bin/cat /etc/passwd | /usr/bin/awk -F':' '($3 == 0) { print $1 }'
+  register: uid_results
+  tags:
+    - scored
+    - section6.2
+    - sectiop6.2.5
+
+- name: 6.2.5 Ensure root is the only UID 0 account (Scored)Ensure that only the word 'root' is returned
+  debug: msg="{{uid_results.stdout}}"
+  when: uid_results is defined and uid_results.stdout|length > 0
+  tags:
+    - scored
+    - section6.2.5
+
+- name: 6.6 Ensure root PATH Integrity (Scored)
+  copy: src=check_path_integrity.sh dest=/root/check_path_integrity.sh owner=root group=root mode=755
+  tags:
+    - scored
+    - section6.6
+
+- name: 6.2.6 Ensure root PATH Integrity (Scored)
+  shell: bash /root/check_path_integrity.sh
+  tags:
+    - scored
+    - section6.2
+    - section6.2.6
+
+- name: 6.2.6 Ensure root PATH Integrity (Scored)
+  command: "{{ item }}"
+  with_items:
+    - mkdir -p /snap/bin
+    - chown root:root /snap/bin
+    - chmod 750 /snap/bin
+  tags:
+    - scored
+    - section6.2
+    - section6.2.6
+
+- name: 6.2.7 Ensure all users' home directories exist (Scored)
+  copy: src=check_home_dirs_permissions.sh dest=/root/check_home_dirs_permissions.sh owner=root group=root mode=0750
+  tags:
+    - scored
+    - section6.2
+    - section6.2.7
+    - manual_remediation
+
+- name: 6.2.7 Ensure all users' home directories exist (Scored)
+  shell: bash /root/check_home_dirs_permissions.sh
+  register: command_result
+  failed_when: 'command_result.stdout != ""'
+  tags:
+    - scored
+    - section6.2
+    - section6.2.7
+    - manual_remediation
+
+- name: 6.2.8 Ensure users' home directories permissions are 750 or more restrictive (Scored)
+  copy: src=set_user_home_dirs_permissions.sh dest=/root/set_user_home_dirs_permissions.sh owner=root group=root mode=0750
+  tags:
+    - scored
+    - section6.2
+    - section6.2.8
+
+- name: 6.2.8 Ensure users' home directories permissions are 750 or more restrictive (Scored)
+  shell: bash /root/set_user_home_dirs_permissions.sh
+  register: command_result
+  # failed_when: 'command_result.stdout != ""'
+  tags:
+    - scored
+    - section6.2
+    - section6.2.8
+    - manual_remediation
+
+# - name: 6.2.8 Ensure users' home directories permissions are 750 or more restrictive - manual remediation (Scored)
+#   command: "chmod o-rwx {{ item }}"
+#   with_items:
+#     - /dev
+#     - /usr/games
+#     - /var/mail
+#     - /var/backups
+#     - /run/systemd
+#     - /var/lib/lxd/
+#     - /run/uuidd
+#     - /var/lib/misc
+#     - /var/lib/nfs
+#     - /var/run/sshd
+#     - /var/spool/postfix
+
+  # failed_when: 'command_result.stdout != ""'
+  # tags:
+  #   - scored
+  #   - section6.2
+  #   - section6.2.8
+  #   - manual_remediation
+
+- name: 6.2.10 Ensure users' dot files are not group or world writable (Scored)
+  copy: src=check_user_dot_files_permissions.sh dest=/root/check_user_dot_files_permissions.sh owner=root group=root mode=0750
+  tags:
+    - scored
+    - section6.2
+    - section6.2.10
+    - manual_remediation
+
+- name: 6.2.10 Ensure users' dot files are not group or world writable (Scored)
+  shell: bash /root/check_user_dot_files_permissions.sh
+  register: command_result
+  failed_when: 'command_result.stdout != ""'
+  tags:
+    - scored
+    - section6.2
+    - section6.2.10
+    - manual_remediation
+
+- name: 6.2.11 Ensure no users have .forward files (Scored)
+  copy: src=check_user_forward.sh dest=/root/check_user_forward.sh owner=root group=root mode=0750
+  tags:
+    - scored
+    - section6.2
+    - section6.2.11
+    - manual_remediation
+
+- name: 6.2.11 Ensure no users have .forward files (Scored)
+  shell: bash /root/check_user_forward.sh
+  register: command_result
+  failed_when: 'command_result.stdout != ""'
+  ignore_errors: yes
+  tags:
+    - scored
+    - section6.2
+    - section6.2.11
+    - manual_remediation
+
+- name: 6.2.12 Ensure no users have .netrc files (Scored)
+  copy: src=check_user_netrc.sh dest=/root/check_user_netrc.sh owner=root group=root mode=0750
+  tags:
+    - scored
+    - section6.2
+    - section6.2.12
+    - manual_remediation
+
+- name: 6.2.12 Ensure no users have .netrc files (Scored)
+  shell: bash /root/check_user_netrc.sh
+  register: command_result
+  failed_when: 'command_result.stdout != ""'
+  ignore_errors: yes
+  tags:
+    - scored
+    - section6.18
+    - manual_remediation
+
+- name: 6.2.13 Ensure users' .netrc Files are not group or world accessible (Scored)
+  copy: src=check_user_netrc_permissions.sh dest=/root/check_user_netrc_permissions.sh owner=root group=root mode=0750
+  tags:
+    - scored
+    - section6.2
+    - section6.2.13
+    - manual_remediation
+
+- name: 6.2.13 Ensure users' .netrc Files are not group or world accessible (Scored)
+  shell: bash /root/check_user_netrc_permissions.sh
+  register: command_result
+  failed_when: 'command_result.stdout != ""'
+  tags:
+    - scored
+    - section6.2
+    - section6.2.13
+
+- name: 6.2.14 Ensure no users have .rhosts files (Scored)
+  copy: src=check_user_rhosts.sh dest=/root/check_user_rhosts.sh owner=root group=root mode=0750
+  tags:
+    - scored
+    - section6.2
+    - section6.2.14
+    - manual_remediation
+
+- name: 6.2.14 Ensure no users have .rhosts files (Scored)
+  shell: bash /root/check_user_rhosts.sh
+  register: command_result
+  failed_when: 'command_result.stdout != ""'
+  tags:
+    - scored
+    - section6.2
+    - section6.2.14
+    - manual_remediation
+
+- name: 6.2.15 Ensure all groups in /etc/passwd exist in /etc/group (Scored)
+  copy: src=check_groups.sh dest=/root/check_groups.sh owner=root group=root mode=0750
+  tags:
+    - scored
+    - section6.2
+    - section6.2.15
+
+- name: 6.2.15 Ensure all groups in /etc/passwd exist in /etc/group (Scored)
+  shell: bash /root/check_groups.sh
+  register: check_groups
+  tags:
+    - scored
+    - section6.2
+    - section6.2.15
+
+- name: 6.2.15 Ensure all groups in /etc/passwd exist in /etc/group (Scored)
+  debug: msg="{{check_groups.stdout}}"
+  when: check_groups is defined and check_groups.stdout|length > 0
+  tags:
+    - scored
+    - section6.2
+    - section6.2.15
+
+- name: 6.2.16 Ensure no duplicate UIDs exist (Scored)
+  copy: src=check_duplicate_uids.sh dest=/root/check_duplicate_uids.sh owner=root group=root mode=0750
+  tags:
+    - scored
+    - section6.2
+    - section6.2.16
+
+- name: 6.2.16 Ensure no duplicate UIDs exist (Scored)
+  shell: bash /root/check_duplicate_uids.sh
+  register: check_duplicate_uids
+  tags:
+    - scored
+    - section6.2
+    - section6.2.16
+
+- name: 6.2.16 Ensure no duplicate UIDs exist (Scored)
+  debug: msg="{{check_duplicate_uids.stdout}}"
+  when: check_duplicate_uids is defined and check_duplicate_uids.stdout|length > 0
+  tags:
+    - scored
+    - section6.2
+    - section6.2.16
+
+- name: 6.2.17 Ensure no duplicate GIDs exist (Scored)
+  copy: src=check_duplicate_gids.sh dest=/root/check_duplicate_gids.sh owner=root group=root mode=0750
+  tags:
+    - scored
+    - section6.2
+    - section6.2.17
+
+- name: 6.2.17 Ensure no duplicate GIDs exist (Scored)
+  shell: bash /root/check_duplicate_gids.sh
+  register: check_duplicate_gids
+  tags:
+    - scored
+    - section6.2
+    - section6.2.17
+
+- name: 6.2.17 Ensure no duplicate GIDs exist (Scored)
+  debug: msg="{{check_duplicate_gids.stdout}}"
+  when: check_duplicate_gids is defined and check_duplicate_gids.stdout|length > 0
+  tags:
+    - scored
+    - section6.2
+    - section6.2.17
+
+- name: 6.2.18 Ensure no duplicate user names exist (Scored)
+  copy: src=check_duplicate_usernames.sh dest=/root/check_duplicate_usernames.sh owner=root group=root mode=0750
+  tags:
+    - scored
+    - section6.2
+    - section6.2.18
+
+- name: 6.2.18 Ensure no duplicate user names exist (Scored)
+  shell: bash /root/check_duplicate_usernames.sh
+  register: check_duplicate_usernames
+  tags:
+    - scored
+    - section6.2
+    - section6.2.18
+
+- name: 6.2.18 Ensure no duplicate user names exist (Scored)
+  debug: msg="{{check_duplicate_usernames.stdout}}"
+  when: check_duplicate_usernames is defined and check_duplicate_usernames.stdout|length > 0
+  tags:
+    - scored
+    - section6.2
+    - section6.2.18
+
+- name: 6.2.19 Ensure no duplicate group names exist (Scored)
+  copy: src=check_duplicate_groupnames.sh dest=/root/check_duplicate_groupnames.sh owner=root group=root mode=0750
+  tags:
+    - scored
+    - section6.2
+    - section6.2.19
+
+- name: 6.2.19 Ensure no duplicate group names exist (Scored)
+  shell: bash /root/check_duplicate_groupnames.sh
+  register: check_duplicate_groupnames
+  tags:
+    - scored
+    - section6.2
+    - section6.2.19
+
+- name: 6.2.19 Ensure no duplicate group names exist (Scored)
+  debug: msg="{{check_duplicate_groupnames.stdout}}"
+  when: check_duplicate_groupnames is defined and check_duplicate_groupnames.stdout|length > 0
+  tags:
+    - scored
+    - section6.2
+    - section6.2.19
+
+- name: 6.2.20 Ensure shadow group is empty (Scored)
+  shell: grep ^shadow /etc/group && awk -F':' '($4 == "<shadow-gid>") { print }' /etc/passwd
+  register: command_result
+  failed_when: 'command_result.stdout != ""'
+  ignore_errors: yes
+  tags:
+    - scored
+    - section6.2
+    - section6.2.20
+    - manual_remediation
+
+
+#
+#
+#
+#
+#
+#
+#
+# - name: 6.12 Check That Users Are Assigned Valid Home Directories (Scored)
+#   copy: src=check_home_dirs.sh dest=/root/check_home_dirs.sh owner=root group=root mode=0750
+#   tags:
+#     - scored
+#     - section6.12
+#
+# - name: 6.12 Check That Users Are Assigned Valid Home Directories (Scored)
+#   shell: bash /root/check_home_dirs.sh
+#   register: check_home_dirs
+#   tags:
+#     - scored
+#     - section6.12
+#
+# - name: 6.12 Check That Users Are Assigned Valid Home Directories (Scored)
+#   debug: msg="{{check_home_dirs.stdout}}"
+#   when: check_home_dirs is defined and check_home_dirs.stdout|length > 0
+#   tags:
+#     - scored
+#     - section6.12
+#
+# - name: 6.13 Check User Home Directory Ownership (Scored)
+#   copy: src=check_home_ownership.sh dest=/root/check_home_ownership.sh owner=root group=root mode=0750
+#   tags:
+#     - scored
+#     - section6.13
+#
+# - name: 6.13 Check User Home Directory Ownership (Scored)
+#   shell: bash /root/check_home_ownership.sh
+#   register: check_home_ownership
+#   tags:
+#     - scored
+#     - section6.13
+#
+# - name: 6.13 Check User Home Directory Ownership (Scored)
+#   debug: msg="{{check_home_ownership.stdout}}"
+#   when: check_home_ownership is defined and check_home_ownership.stdout|length > 0
+#   tags:
+#     - scored
+#     - section6.13

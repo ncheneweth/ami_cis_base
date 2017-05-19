@@ -1,5 +1,11 @@
 ---
-# file: tasks/section-01.yml
+# # file: tasks/section-01.yml
+# - name: remove old dirs from original setupcon
+#   file: dest="{{ item }}" state="absent"
+#   with_items:
+#     - /var/log.old
+#     - /var.old
+#     - /home.old
 
 - name: 1.1 Install Updates, Patches and Additional Security Software (Not Scored)
   apt: upgrade=dist update_cache=yes
@@ -21,16 +27,6 @@
   tags:
     - scored
     - section1.1.1
-# disabled until seperate mounts are in place
-# - name: 1.1.3 Ensure nodev option set on /tmp partition (Scored)
-# - name: 1.1.4 Ensure nosuid option set on /tmp partition (Scored)
-# - name: 1.1.7 Ensure nodev option set on /var/tmp partition (Scored)
-# - name: 1.1.8 Ensure nosuid option set on /var/tmp partition (Scored)
-# - name: 1.1.9 Ensure noexec option set on /var/tmp partition (Scored)
-# - name: 1.1.13 Ensure nodev option set on /home partition (Scored)
-# - name: Ensure nodev option set on /dev/shm partition (Scored)
-# - name: 1.1.15 Ensure nosuid option set on /dev/shm partition (Scored)
-# - name: 1.1.16 Ensure noexec option set on /dev/shm partition (Scored)
 
 - name: 1.3.1 Ensure AIDE is installed (Scored)
   apt: name=aide update_cache=yes state=present
@@ -39,24 +35,34 @@
     - scored
     - section1.3
     - section1.3.1
+
 - name: 1.3.2 Ensure filesystem integrity is regularly checked (Scored)
-  cron:
-    name: aide check
-    minute: 0
-    hour: 5
-    user: root
-    job: "/usr/bin/aide --check"
-    cron_file: aide
+  lineinfile: dest="{{ item }}" line="0 5 * * * root /usr/bin/aide --check" insertafter=EOF state=present create=true
+  with_items:
+    - /var/spool/cron/crontabs/root
+    - /etc/crontab
   tags:
-    - scored
     - section1.3
     - section1.3.2
+
+  # cron:
+  #   name: aide check
+  #   minute: 0
+  #   hour: 5
+  #   user: root
+  #   job: "/usr/bin/aide --check"
+  #   cron_file: aide
+  # tags:
+  #   - scored
+  #   - section1.3
+  #   - section1.3.2
 - name: 1.4.1 Ensure permissions on bootloader config are configured (Scored)
-  shell: chown root:root /boot/grub/grub.cfg; chmod og-rwx /boot/grub/grub.cfg
+  command: chmod 400 /boot/grub/grub.cfg
   tags:
     - scored
     - section1.4
     - section1.4.1
+
 - name: 1.5.1 Ensure core dumps are restricted /etc/security/limits.d/core-dump.conf (Scored)
   lineinfile: dest=/etc/security/limits.d/core-dump.conf line="* hard core 0" insertafter=EOF state=present create=true
   tags:
@@ -70,6 +76,14 @@
     - scored
     - section1.5
     - section1.5.1
+
+- name: 1.5.1 Ensure core dumps are restricted sysctl (Scored)
+  sysctl: name="fs.suid_dumpable" value=0 ignoreerrors=yes sysctl_set=yes reload=yes state=present
+  tags:
+    - notscored
+    - section1.5
+    - section1.5.1
+
 - name: 1.7.1 Command Line Warning Banners
   copy: src={{ item.src }} dest={{ item.dest }} owner=root group=root mode=0644
   with_items:

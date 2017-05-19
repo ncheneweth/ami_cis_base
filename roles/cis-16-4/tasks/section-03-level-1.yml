@@ -5,7 +5,7 @@
   sysctl: name="{{item}}" value=0 ignoreerrors=yes value=0 sysctl_set=yes reload=yes state=present
   with_items:
     - net.ipv4.conf.all.send_redirects
-    - net.ipv4.conf.all.send_redirects
+    - net.ipv4.conf.default.send_redirects
   tags:
     - scored
     - section3.1
@@ -130,16 +130,17 @@
     - notscored
     - section3.3
     - section3.3.3
-# - name: 3.3.3 Ensure IPv6 is disabled (Not Scored)
-#   lineinfile: dest=/boot/grub/grub.cfg line="{{item}}" insertafter=EOF state=present create=true
-#   lineinfile:
-#     path: /etc/default/grub
-#     regexp: '^GRUB_CMDLINE_LINUX=\"\"'
-#     line: 'GRUB_CMDLINE_LINUX="ipv6.disable=1"'
-#   tags:
-#     - notscored
-#     - section3.3
-#     - section3.3.3
+
+- name: 3.3.3 Ensure IPv6 is disabled (Not Scored)
+  lineinfile:
+    path: /etc/default/grub
+    regexp: '^GRUB_CMDLINE_LINUX=\"\"'
+    line: 'GRUB_CMDLINE_LINUX="ipv6.disable=1"'
+  notify: update grub
+  tags:
+    - notscored
+    - section3.3
+    - section3.3.3
 
 - name: 3.4 TCP Wrappers
   debug: msg="***  TCP Wrappers add an additional layer of protection by defining which hosts are or are not allowed to connect to 'wrapped' network services"

@@ -9,3 +9,32 @@
   tags:
     - notscored
     - section2.1.1
+
+- name: 2.2.15 Ensure mail transfer agent is configured for local-only mode (Scored)
+  apt: name="postfix" update_cache=yes  state=installed
+  tags:
+    - scored
+    - section2.2
+    - section2.2.15
+
+- name: 2.2.15 Ensure mail transfer agent is configured for local-only mode (Scored)
+  lineinfile: dest="/etc/postfix/main.cf" line="inet_interfaces = localhost" insertafter=EOF state=present create=true
+  notify: restart postfix
+  tags:
+    - scored
+    - section2.2
+    - section2.2.15
+- name: 2.2.15 Ensure mail transfer agent is configured for local-only mode (Scored)
+  lineinfile: dest="/etc/postfix/main.cf" regexp="^mynetwork" line="#mynetwork"
+  notify: restart postfix
+  tags:
+    - scored
+    - section2.2
+    - section2.2.15
+
+- name: 2.3.4 Ensure telnet client is not installed (Scored)
+  apt: name="telnet" state=absent
+  tags:
+    - scored
+    - section2.3
+    - section2.3.4

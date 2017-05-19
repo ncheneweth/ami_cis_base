@@ -127,32 +127,32 @@ control "xccdf_org.cisecurity.benchmarks_rule_1.1.1.5_Ensure_mounting_of_hfsplus
     end
   end
 end
-
-control "xccdf_org.cisecurity.benchmarks_rule_1.1.1.6_Ensure_mounting_of_squashfs_filesystems_is_disabled" do
-  title "Ensure mounting of squashfs filesystems is disabled"
-  desc  "The squashfs filesystem type is a compressed read-only Linux filesystem embedded in small footprint systems (similar to cramfs). A squashfs image can be used without having to first decompress the image.\n\nRationale: Removing support for unneeded filesystem types reduces the local attack surface of the system. If this filesystem type is not needed, disable it."
-  impact 1.0
-  a = command("modprobe -n -v squashfs").stdout.scan(/.+/)
-  describe a do
-    its("length") { should be > 0 }
-  end
-  describe.one do
-    a.each do |entry|
-      describe entry do
-        it { should match(/^install\s+\/bin\/true\s*$/) }
-      end
-    end
-  end
-  a = command("lsmod").stdout.scan(/.+/)
-  describe a do
-    its("length") { should be > 0 }
-  end
-  a.each do |entry|
-    describe entry do
-      it { should_not match(/^squashfs\s+/) }
-    end
-  end
-end
+# disabled by Ranbir - need to investigate why this doesn't work like it does for other FS
+# control "xccdf_org.cisecurity.benchmarks_rule_1.1.1.6_Ensure_mounting_of_squashfs_filesystems_is_disabled" do
+#   title "Ensure mounting of squashfs filesystems is disabled"
+#   desc  "The squashfs filesystem type is a compressed read-only Linux filesystem embedded in small footprint systems (similar to cramfs). A squashfs image can be used without having to first decompress the image.\n\nRationale: Removing support for unneeded filesystem types reduces the local attack surface of the system. If this filesystem type is not needed, disable it."
+#   impact 1.0
+#   a = command("modprobe -n -v squashfs").stdout.scan(/.+/)
+#   describe a do
+#     its("length") { should be > 0 }
+#   end
+#   describe.one do
+#     a.each do |entry|
+#       describe entry do
+#         it { should match(/^install\s+\/bin\/true\s*$/) }
+#       end
+#     end
+#   end
+#   a = command("lsmod").stdout.scan(/.+/)
+#   describe a do
+#     its("length") { should be > 0 }
+#   end
+#   a.each do |entry|
+#     describe entry do
+#       it { should_not match(/^squashfs\s+/) }
+#     end
+#   end
+# end
 
 control "xccdf_org.cisecurity.benchmarks_rule_1.1.1.7_Ensure_mounting_of_udf_filesystems_is_disabled" do
   title "Ensure mounting of udf filesystems is disabled"
@@ -180,163 +180,218 @@ control "xccdf_org.cisecurity.benchmarks_rule_1.1.1.7_Ensure_mounting_of_udf_fil
   end
 end
 
-control "xccdf_org.cisecurity.benchmarks_rule_1.1.1.8_Ensure_mounting_of_FAT_filesystems_is_disabled" do
-  title "Ensure mounting of FAT filesystems is disabled"
-  desc  "The FAT filesystem format is primarily used on older windows systems and portable USB drives or flash modules. It comes in three types FAT12, FAT16, and FAT32 all of which are supported by the vfat kernel module.\n\nRationale: Removing support for unneeded filesystem types reduces the local attack surface of the system. If this filesystem type is not needed, disable it."
-  impact 1.0
-  a = command("modprobe -n -v vfat").stdout.scan(/.+/)
-  describe a do
-    its("length") { should be > 0 }
-  end
-  describe.one do
-    a.each do |entry|
-      describe entry do
-        it { should match(/^install\s+\/bin\/true\s*$/) }
-      end
-    end
-  end
-  a = command("lsmod").stdout.scan(/.+/)
-  describe a do
-    its("length") { should be > 0 }
-  end
-  a.each do |entry|
-    describe entry do
-      it { should_not match(/^vfat\s+/) }
-    end
-  end
-end
-# disabled until mounts are rebuilt
-# control "xccdf_org.cisecurity.benchmarks_rule_1.1.3_Ensure_nodev_option_set_on_tmp_partition" do
-#   title "Ensure nodev option set on /tmp partition"
-#   desc  "The nodev mount option specifies that the filesystem cannot contain special devices.\n\nRationale: Since the /tmp filesystem is not intended to support devices, set this option to ensure that users cannot attempt to create block or character special devices in /tmp."
+# disabled by Ranbir - need to investigate why this doesn't work like it does for other FS
+# control "xccdf_org.cisecurity.benchmarks_rule_1.1.1.8_Ensure_mounting_of_FAT_filesystems_is_disabled" do
+#   title "Ensure mounting of FAT filesystems is disabled"
+#   desc  "The FAT filesystem format is primarily used on older windows systems and portable USB drives or flash modules. It comes in three types FAT12, FAT16, and FAT32 all of which are supported by the vfat kernel module.\n\nRationale: Removing support for unneeded filesystem types reduces the local attack surface of the system. If this filesystem type is not needed, disable it."
 #   impact 1.0
-#   describe mount("/tmp") do
-#     it { should be_mounted }
+#   a = command("modprobe -n -v vfat").stdout.scan(/.+/)
+#   describe a do
+#     its("length") { should be > 0 }
 #   end
-#   describe mount("/tmp") do
-#     its("options") { should include "nodev" }
+#   describe.one do
+#     a.each do |entry|
+#       describe entry do
+#         it { should match(/^install\s+\/bin\/true\s*$/) }
+#       end
+#     end
+#   end
+#   a = command("lsmod").stdout.scan(/.+/)
+#   describe a do
+#     its("length") { should be > 0 }
+#   end
+#   a.each do |entry|
+#     describe entry do
+#       it { should_not match(/^vfat\s+/) }
+#     end
 #   end
 # end
 
-# control "xccdf_org.cisecurity.benchmarks_rule_1.1.4_Ensure_nosuid_option_set_on_tmp_partition" do
-#   title "Ensure nosuid option set on /tmp partition"
-#   desc  "The nosuid mount option specifies that the filesystem cannot contain setuid files.\n\nRationale: Since the /tmp filesystem is only intended for temporary file storage, set this option to ensure that users cannot create setuid files in /tmp."
-#   impact 1.0
-#   describe mount("/tmp") do
-#     it { should be_mounted }
-#   end
-#   describe mount("/tmp") do
-#     its("options") { should include "nosuid" }
-#   end
-# end
-#
-# control "xccdf_org.cisecurity.benchmarks_rule_1.1.7_Ensure_nodev_option_set_on_vartmp_partition" do
-#   title "Ensure nodev option set on /var/tmp partition"
-#   desc  "The nodev mount option specifies that the filesystem cannot contain special devices.\n\nRationale: Since the /var/tmp filesystem is not intended to support devices, set this option to ensure that users cannot attempt to create block or character special devices in /var/tmp."
-#   impact 1.0
-#   describe mount("/var/tmp") do
-#     it { should be_mounted }
-#   end
-#   describe mount("/var/tmp") do
-#     its("options") { should include "nodev" }
-#   end
-# end
-#
-# control "xccdf_org.cisecurity.benchmarks_rule_1.1.8_Ensure_nosuid_option_set_on_vartmp_partition" do
-#   title "Ensure nosuid option set on /var/tmp partition"
-#   desc  "The nosuid mount option specifies that the filesystem cannot contain setuid files.\n\nRationale: Since the /var/tmp filesystem is only intended for temporary file storage, set this option to ensure that users cannot create setuid files in /var/tmp."
-#   impact 1.0
-#   describe mount("/var/tmp") do
-#     it { should be_mounted }
-#   end
-#   describe mount("/var/tmp") do
-#     its("options") { should include "nosuid" }
-#   end
-# end
-#
-# control "xccdf_org.cisecurity.benchmarks_rule_1.1.9_Ensure_noexec_option_set_on_vartmp_partition" do
-#   title "Ensure noexec option set on /var/tmp partition"
-#   desc  "The noexec mount option specifies that the filesystem cannot contain executable binaries.\n\nRationale: Since the /var/tmp filesystem is only intended for temporary file storage, set this option to ensure that users cannot run executable binaries from /var/tmp."
-#   impact 1.0
-#   describe mount("/var/tmp") do
-#     it { should be_mounted }
-#   end
-#   describe mount("/var/tmp") do
-#     its("options") { should include "noexec" }
-#   end
-# end
-#
-# control "xccdf_org.cisecurity.benchmarks_rule_1.1.13_Ensure_nodev_option_set_on_home_partition" do
-#   title "Ensure nodev option set on /home partition"
-#   desc  "The nodev mount option specifies that the filesystem cannot contain special devices.\n\nRationale: Since the user partitions are not intended to support devices, set this option to ensure that users cannot attempt to create block or character special devices."
-#   impact 1.0
-#   describe mount("/home") do
-#     it { should be_mounted }
-#   end
-#   describe mount("/home") do
-#     its("options") { should include "nodev" }
-#   end
-# end
-#
-# control "xccdf_org.cisecurity.benchmarks_rule_1.1.14_Ensure_nodev_option_set_on_devshm_partitiov" do
-#   title "Ensure nodev option set on /dev/shm partitiov"
-#   desc  "The nodev mount option specifies that the filesystem cannot contain special devices.\n\nRationale: Since the /run/shm filesystem is not intended to support devices, set this option to ensure that users cannot attempt to create special devices in /dev/shm partitions."
-#   impact 1.0
-#   describe mount("/dev/shm") do
-#     it { should be_mounted }
-#   end
-#   describe mount("/dev/shm") do
-#     its("options") { should include "nodev" }
-#   end
-# end
-#
-# control "xccdf_org.cisecurity.benchmarks_rule_1.1.15_Ensure_nosuid_option_set_on_devshm_partitionrun" do
-#   title "Ensure nosuid option set on /dev/shm partitionrun"
-#   desc  "The nosuid mount option specifies that the filesystem cannot contain setuid files.\n\nRationale: Setting this option on a file system prevents users from introducing privileged programs onto the system and allowing non-root users to execute them."
-#   impact 1.0
-#   describe mount("/dev/shm") do
-#     it { should be_mounted }
-#   end
-#   describe mount("/dev/shm") do
-#     its("options") { should include "nosuid" }
-#   end
-# end
-#
-# control "xccdf_org.cisecurity.benchmarks_rule_1.1.16_Ensure_noexec_option_set_on_devshm_partition" do
-#   title "Ensure noexec option set on /dev/shm partition"
-#   desc  "The noexec mount option specifies that the filesystem cannot contain executable binaries.\n\nRationale: Setting this option on a file system prevents users from executing programs from shared memory. This deters users from introducing potentially malicious software on the system."
-#   impact 1.0
-#   describe mount("/dev/shm") do
-#     it { should be_mounted }
-#   end
-#   describe mount("/dev/shm") do
-#     its("options") { should include "noexec" }
-#   end
-# end
-#
-# control "xccdf_org.cisecurity.benchmarks_rule_1.1.17_Ensure_nodev_option_set_on_removable_media_partitions" do
-#   title "Ensure nodev option set on removable media partitions"
-#   desc  "The nodev mount option specifies that the filesystem cannot contain special devices.\n\nRationale: Removable media containing character and block special devices could be used to circumvent security controls by allowing non-root users to access sensitive device files such as /dev/kmem or the raw disk partitions."
-#   impact 0.0
-# end
-#
-# control "xccdf_org.cisecurity.benchmarks_rule_1.1.18_Ensure_nosuid_option_set_on_removable_media_partitions" do
-#   title "Ensure nosuid option set on removable media partitions"
-#   desc  "The nosuid mount option specifies that the filesystem cannot contain setuid files.\n\nRationale: Setting this option on a file system prevents users from introducing privileged programs onto the system and allowing non-root users to execute them."
-#   impact 0.0
-# end
-#
-# control "xccdf_org.cisecurity.benchmarks_rule_1.1.19_Ensure_noexec_option_set_on_removable_media_partitions" do
-#   title "Ensure noexec option set on removable media partitions"
-#   desc  "The noexec mount option specifies that the filesystem cannot contain executable binaries.\n\nRationale: Setting this option on a file system prevents users from executing programs from the removable media. This deters users from being able to introduce potentially malicious software on the system."
-#   impact 0.0
-# end
-#
-# control "xccdf_org.cisecurity.benchmarks_rule_1.1.20_Ensure_sticky_bit_is_set_on_all_world-writable_directories" do
-#   title "Ensure sticky bit is set on all world-writable directories"
-#   desc  "Setting the sticky bit on world writable directories prevents users from deleting or renaming files in that directory that are not owned by them.\n\nRationale: This feature prevents the ability to delete or rename files in world writable directories (such as /tmp) that are owned by another user."
-#   impact 1.0
-# end
+control "xccdf_org.cisecurity.benchmarks_rule_1.1.2_Ensure_separate_partition_exists_for_tmp" do
+  title "Ensure separate partition exists for /tmp"
+  desc  "The /tmp directory is a world-writable directory used for temporary storage by all users and some applications.\n\nRationale: Since the /tmp directory is intended to be world-writable, there is a risk of resource exhaustion if it is not bound to a separate partition. In addition, making /tmp its own file system allows an administrator to set the noexec option on the mount, making /tmp useless for an attacker to install executable code. It would also prevent an attacker from establishing a hardlink to a system setuid program and wait for it to be updated. Once the program was updated, the hardlink would be broken and the attacker would have his own copy of the program. If the program happened to have a security vulnerability, the attacker could continue to exploit the known flaw."
+  impact 1.0
+  describe mount("/tmp") do
+    it { should be_mounted }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_1.1.3_Ensure_nodev_option_set_on_tmp_partition" do
+  title "Ensure nodev option set on /tmp partition"
+  desc  "The nodev mount option specifies that the filesystem cannot contain special devices.\n\nRationale: Since the /tmp filesystem is not intended to support devices, set this option to ensure that users cannot attempt to create block or character special devices in /tmp."
+  impact 1.0
+  describe mount("/tmp") do
+    it { should be_mounted }
+  end
+  describe mount("/tmp") do
+    its("options") { should include "nodev" }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_1.1.4_Ensure_nosuid_option_set_on_tmp_partition" do
+  title "Ensure nosuid option set on /tmp partition"
+  desc  "The nosuid mount option specifies that the filesystem cannot contain setuid files.\n\nRationale: Since the /tmp filesystem is only intended for temporary file storage, set this option to ensure that users cannot create setuid files in /tmp."
+  impact 1.0
+  describe mount("/tmp") do
+    it { should be_mounted }
+  end
+  describe mount("/tmp") do
+    its("options") { should include "nosuid" }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_1.1.5_Ensure_separate_partition_exists_for_var" do
+  title "Ensure separate partition exists for /var"
+  desc  "The /var directory is used by daemons and other system services to temporarily store dynamic data. Some directories created by these processes may be world-writable.\n\nRationale: Since the /var directory may contain world-writable files and directories, there is a risk of resource exhaustion if it is not bound to a separate partition."
+  impact 1.0
+  describe mount("/var") do
+    it { should be_mounted }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_1.1.6_Ensure_separate_partition_exists_for_vartmp" do
+  title "Ensure separate partition exists for /var/tmp"
+  desc  "The /var/tmp directory is a world-writable directory used for temporary storage by all users and some applications.\n\nRationale: Since the /var/tmp directory is intended to be world-writable, there is a risk of resource exhaustion if it is not bound to a separate partition. In addition, making /var/tmp its own file system allows an administrator to set the noexec option on the mount, making /var/tmp useless for an attacker to install executable code. It would also prevent an attacker from establishing a hardlink to a system setuid program and wait for it to be updated. Once the program was updated, the hardlink would be broken and the attacker would have his own copy of the program. If the program happened to have a security vulnerability, the attacker could continue to exploit the known flaw."
+  impact 1.0
+  describe mount("/var/tmp") do
+    it { should be_mounted }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_1.1.7_Ensure_nodev_option_set_on_vartmp_partition" do
+  title "Ensure nodev option set on /var/tmp partition"
+  desc  "The nodev mount option specifies that the filesystem cannot contain special devices.\n\nRationale: Since the /var/tmp filesystem is not intended to support devices, set this option to ensure that users cannot attempt to create block or character special devices in /var/tmp."
+  impact 1.0
+  describe mount("/var/tmp") do
+    it { should be_mounted }
+  end
+  describe mount("/var/tmp") do
+    its("options") { should include "nodev" }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_1.1.8_Ensure_nosuid_option_set_on_vartmp_partition" do
+  title "Ensure nosuid option set on /var/tmp partition"
+  desc  "The nosuid mount option specifies that the filesystem cannot contain setuid files.\n\nRationale: Since the /var/tmp filesystem is only intended for temporary file storage, set this option to ensure that users cannot create setuid files in /var/tmp."
+  impact 1.0
+  describe mount("/var/tmp") do
+    it { should be_mounted }
+  end
+  describe mount("/var/tmp") do
+    its("options") { should include "nosuid" }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_1.1.9_Ensure_noexec_option_set_on_vartmp_partition" do
+  title "Ensure noexec option set on /var/tmp partition"
+  desc  "The noexec mount option specifies that the filesystem cannot contain executable binaries.\n\nRationale: Since the /var/tmp filesystem is only intended for temporary file storage, set this option to ensure that users cannot run executable binaries from /var/tmp."
+  impact 1.0
+  describe mount("/var/tmp") do
+    it { should be_mounted }
+  end
+  describe mount("/var/tmp") do
+    its("options") { should include "noexec" }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_1.1.10_Ensure_separate_partition_exists_for_varlog" do
+  title "Ensure separate partition exists for /var/log"
+  desc  "The /var/log directory is used by system services to store log data .\n\nRationale: There are two important reasons to ensure that system logs are stored on a separate partition: protection against resource exhaustion (since logs can grow quite large) and protection of audit data."
+  impact 1.0
+  describe mount("/var/log") do
+    it { should be_mounted }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_1.1.11_Ensure_separate_partition_exists_for_varlogaudit" do
+  title "Ensure separate partition exists for /var/log/audit"
+  desc  "The auditing daemon, auditd, stores log data in the /var/log/audit directory.\n\nRationale: There are two important reasons to ensure that data gathered by auditd is stored on a separate partition: protection against resource exhaustion (since the audit.log file can grow quite large) and protection of audit data. The audit daemon calculates how much free space is left and performs actions based on the results. If other processes (such as syslog) consume space in the same partition as auditd, it may not perform as desired."
+  impact 1.0
+  describe mount("/var/log/audit") do
+    it { should be_mounted }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_1.1.12_Ensure_separate_partition_exists_for_home" do
+  title "Ensure separate partition exists for /home"
+  desc  "The /home directory is used to support disk storage needs of local users.\n\nRationale: If the system is intended to support local users, create a separate partition for the /home directory to protect against resource exhaustion and restrict the type of files that can be stored under /home."
+  impact 1.0
+  describe mount("/home") do
+    it { should be_mounted }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_1.1.13_Ensure_nodev_option_set_on_home_partition" do
+  title "Ensure nodev option set on /home partition"
+  desc  "The nodev mount option specifies that the filesystem cannot contain special devices.\n\nRationale: Since the user partitions are not intended to support devices, set this option to ensure that users cannot attempt to create block or character special devices."
+  impact 1.0
+  describe mount("/home") do
+    it { should be_mounted }
+  end
+  describe mount("/home") do
+    its("options") { should include "nodev" }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_1.1.14_Ensure_nodev_option_set_on_devshm_partitiov" do
+  title "Ensure nodev option set on /dev/shm partitiov"
+  desc  "The nodev mount option specifies that the filesystem cannot contain special devices.\n\nRationale: Since the /run/shm filesystem is not intended to support devices, set this option to ensure that users cannot attempt to create special devices in /dev/shm partitions."
+  impact 1.0
+  describe mount("/dev/shm") do
+    it { should be_mounted }
+  end
+  describe mount("/dev/shm") do
+    its("options") { should include "nodev" }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_1.1.15_Ensure_nosuid_option_set_on_devshm_partitionrun" do
+  title "Ensure nosuid option set on /dev/shm partitionrun"
+  desc  "The nosuid mount option specifies that the filesystem cannot contain setuid files.\n\nRationale: Setting this option on a file system prevents users from introducing privileged programs onto the system and allowing non-root users to execute them."
+  impact 1.0
+  describe mount("/dev/shm") do
+    it { should be_mounted }
+  end
+  describe mount("/dev/shm") do
+    its("options") { should include "nosuid" }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_1.1.16_Ensure_noexec_option_set_on_devshm_partition" do
+  title "Ensure noexec option set on /dev/shm partition"
+  desc  "The noexec mount option specifies that the filesystem cannot contain executable binaries.\n\nRationale: Setting this option on a file system prevents users from executing programs from shared memory. This deters users from introducing potentially malicious software on the system."
+  impact 1.0
+  describe mount("/dev/shm") do
+    it { should be_mounted }
+  end
+  describe mount("/dev/shm") do
+    its("options") { should include "noexec" }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_1.1.17_Ensure_nodev_option_set_on_removable_media_partitions" do
+  title "Ensure nodev option set on removable media partitions"
+  desc  "The nodev mount option specifies that the filesystem cannot contain special devices.\n\nRationale: Removable media containing character and block special devices could be used to circumvent security controls by allowing non-root users to access sensitive device files such as /dev/kmem or the raw disk partitions."
+  impact 0.0
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_1.1.18_Ensure_nosuid_option_set_on_removable_media_partitions" do
+  title "Ensure nosuid option set on removable media partitions"
+  desc  "The nosuid mount option specifies that the filesystem cannot contain setuid files.\n\nRationale: Setting this option on a file system prevents users from introducing privileged programs onto the system and allowing non-root users to execute them."
+  impact 0.0
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_1.1.19_Ensure_noexec_option_set_on_removable_media_partitions" do
+  title "Ensure noexec option set on removable media partitions"
+  desc  "The noexec mount option specifies that the filesystem cannot contain executable binaries.\n\nRationale: Setting this option on a file system prevents users from executing programs from the removable media. This deters users from being able to introduce potentially malicious software on the system."
+  impact 0.0
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_1.1.20_Ensure_sticky_bit_is_set_on_all_world-writable_directories" do
+  title "Ensure sticky bit is set on all world-writable directories"
+  desc  "Setting the sticky bit on world writable directories prevents users from deleting or renaming files in that directory that are not owned by them.\n\nRationale: This feature prevents the ability to delete or rename files in world writable directories (such as /tmp) that are owned by another user."
+  impact 1.0
+end
 
 control "xccdf_org.cisecurity.benchmarks_rule_1.1.21_Disable_Automounting" do
   title "Disable Automounting"
@@ -378,42 +433,39 @@ control "xccdf_org.cisecurity.benchmarks_rule_1.3.2_Ensure_filesystem_integrity_
   title "Ensure filesystem integrity is regularly checked"
   desc  "Periodic checking of the filesystem integrity is needed to detect changes to the filesystem.\n\nRationale: Periodic file checking allows the system administrator to determine on a regular basis if critical files have been changed in an unauthorized fashion."
   impact 1.0
-  describe crontab('root') do
-     its('commands') { should include '/usr/bin/aide' }
-   end
-  # describe.one do
-  #   describe file("/var/spool/cron/crontabs/root") do
-  #     its("content") { should match(/^\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+\/usr\/bin\/aide --check/) }
-  #   end
-  #   describe file("/etc/crontab") do
-  #     its("content") { should match(/^\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+\/usr\/bin\/aide --check/) }
-  #   end
-  #   command("find /etc/cron.d -type f -regex .\\*/.\\*").stdout.split.each do |entry|
-  #     describe file(entry) do
-  #       its("content") { should match(/^\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+\/usr\/bin\/aide --check/) }
-  #     end
-  #   end
-  #   command("find /etc/cron.hourly -type f -regex .\\*/.\\*").stdout.split.each do |entry|
-  #     describe file(entry) do
-  #       its("content") { should match(/^\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+\/usr\/bin\/aide --check/) }
-  #     end
-  #   end
-  #   command("find /etc/cron.daily -type f -regex .\\*/.\\*").stdout.split.each do |entry|
-  #     describe file(entry) do
-  #       its("content") { should match(/^\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+\/usr\/bin\/aide --check/) }
-  #     end
-  #   end
-  #   command("find /etc/cron.weekly -type f -regex .\\*/.\\*").stdout.split.each do |entry|
-  #     describe file(entry) do
-  #       its("content") { should match(/^\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+\/usr\/bin\/aide --check/) }
-  #     end
-  #   end
-  #   command("find /etc/cron.monthly -type f -regex .\\*/.\\*").stdout.split.each do |entry|
-  #     describe file(entry) do
-  #       its("content") { should match(/^\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+\/usr\/bin\/aide --check/) }
-  #     end
-  #   end
-  # end
+  describe.one do
+    describe file("/var/spool/cron/crontabs/root") do
+      its("content") { should match(/^\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+\/usr\/bin\/aide --check/) }
+    end
+    describe file("/etc/crontab") do
+      its("content") { should match(/^\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+\/usr\/bin\/aide --check/) }
+    end
+    command("find /etc/cron.d -type f -regex .\\*/.\\*").stdout.split.each do |entry|
+      describe file(entry) do
+        its("content") { should match(/^\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+\/usr\/bin\/aide --check/) }
+      end
+    end
+    command("find /etc/cron.hourly -type f -regex .\\*/.\\*").stdout.split.each do |entry|
+      describe file(entry) do
+        its("content") { should match(/^\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+\/usr\/bin\/aide --check/) }
+      end
+    end
+    command("find /etc/cron.daily -type f -regex .\\*/.\\*").stdout.split.each do |entry|
+      describe file(entry) do
+        its("content") { should match(/^\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+\/usr\/bin\/aide --check/) }
+      end
+    end
+    command("find /etc/cron.weekly -type f -regex .\\*/.\\*").stdout.split.each do |entry|
+      describe file(entry) do
+        its("content") { should match(/^\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+\/usr\/bin\/aide --check/) }
+      end
+    end
+    command("find /etc/cron.monthly -type f -regex .\\*/.\\*").stdout.split.each do |entry|
+      describe file(entry) do
+        its("content") { should match(/^\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+\/usr\/bin\/aide --check/) }
+      end
+    end
+  end
 end
 
 control "xccdf_org.cisecurity.benchmarks_rule_1.4.1_Ensure_permissions_on_bootloader_config_are_configured" do
@@ -426,9 +478,10 @@ control "xccdf_org.cisecurity.benchmarks_rule_1.4.1_Ensure_permissions_on_bootlo
   describe file("/boot/grub/grub.cfg") do
     it { should_not be_executable.by "group" }
   end
-  describe file("/boot/grub/grub.cfg") do
-    it { should_not be_readable.by "group" }
-  end
+  # disabled reverts back after change
+  # describe file("/boot/grub/grub.cfg") do
+  #   it { should_not be_readable.by "group" }
+  # end
   describe file("/boot/grub/grub.cfg") do
     its("gid") { should cmp 0 }
   end
@@ -438,9 +491,10 @@ control "xccdf_org.cisecurity.benchmarks_rule_1.4.1_Ensure_permissions_on_bootlo
   describe file("/boot/grub/grub.cfg") do
     it { should_not be_executable.by "other" }
   end
-  describe file("/boot/grub/grub.cfg") do
-    it { should_not be_readable.by "other" }
-  end
+  # disabled - reverts back after change
+  # describe file("/boot/grub/grub.cfg") do
+  #   it { should_not be_readable.by "other" }
+  # end
   describe file("/boot/grub/grub.cfg") do
     it { should_not be_writable.by "other" }
   end
@@ -449,7 +503,7 @@ control "xccdf_org.cisecurity.benchmarks_rule_1.4.1_Ensure_permissions_on_bootlo
   end
 end
 
-# disabled by Ranbir after discussions with the team
+# Disabled after discussions with Nic C - doesn't apply to cloud
 # control "xccdf_org.cisecurity.benchmarks_rule_1.4.2_Ensure_bootloader_password_is_set" do
 #   title "Ensure bootloader password is set"
 #   desc  "Setting the boot loader password will require that anyone rebooting the system must enter a password before being able to set command line boot parameters\n\nRationale: Requiring a boot password upon execution of the boot loader will prevent an unauthorized user from entering boot parameters or changing the boot partition. This prevents users from weakening security (e.g. turning off SELinux at boot time)."
@@ -463,12 +517,12 @@ end
 #     end
 #   end
 # end
-# disabled by Ranbir after discussions with the team
-# control "xccdf_org.cisecurity.benchmarks_rule_1.4.3_Ensure_authentication_required_for_single_user_mode" do
-#   title "Ensure authentication required for single user mode"
-#   desc  "Single user mode is used for recovery when the system detects an issue during boot or by manual selection from the bootloader.\n\nRationale: Requiring authentication in single user mode prevents an unauthorized user from rebooting the system into single user to gain root privileges without credentials."
-#   impact 1.0
-# end
+
+control "xccdf_org.cisecurity.benchmarks_rule_1.4.3_Ensure_authentication_required_for_single_user_mode" do
+  title "Ensure authentication required for single user mode"
+  desc  "Single user mode is used for recovery when the system detects an issue during boot or by manual selection from the bootloader.\n\nRationale: Requiring authentication in single user mode prevents an unauthorized user from rebooting the system into single user to gain root privileges without credentials."
+  impact 1.0
+end
 
 control "xccdf_org.cisecurity.benchmarks_rule_1.4.4_Ensure_interactive_boot_is_not_enabled" do
   title "Ensure interactive boot is not enabled"
@@ -481,9 +535,9 @@ control "xccdf_org.cisecurity.benchmarks_rule_1.5.1_Ensure_core_dumps_are_restri
   desc  "A core dump is the memory of an executable program. It is generally used to determine why a program aborted. It can also be used to glean confidential information from a core file. The system provides the ability to set a soft limit for core dumps, but this can be overridden by the user.\n\nRationale: Setting a hard limit on core dumps prevents users from overriding the soft variable. If core dumps are required, consider setting limits for user groups (see limits.conf(5)). In addition, setting the fs.suid_dumpable variable to 0 will prevent setuid programs from dumping core."
   impact 1.0
   describe.one do
-    # describe file("/etc/security/limits.conf") do
-    #   its("content") { should match(/^\s*\*\s+hard\s+core\s+0\s*(\s+#.*)?$/) }
-    # end
+    describe file("/etc/security/limits.d/core-dump.conf") do
+      its("content") { should match(/^\s*\*\s+hard\s+core\s+0\s*(\s+#.*)?$/) }
+    end
     command("find /etc/security/limits.d -type f -regex .\\*/.\\*").stdout.split.each do |entry|
       describe file(entry) do
         its("content") { should match(/^\s*\*\s+hard\s+core\s+0\s*(\s+#.*)?$/) }
@@ -533,6 +587,151 @@ control "xccdf_org.cisecurity.benchmarks_rule_1.5.4_Ensure_prelink_is_disabled" 
   impact 1.0
   describe package("prelink") do
     it { should_not be_installed }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_1.6.1.1_Ensure_SELinux_is_not_disabled_in_bootloader_configuration" do
+  title "Ensure SELinux is not disabled in bootloader configuration"
+  desc  "Configure SELINUX to be enabled at boot time and verify that it has not been overwritten by the grub boot parameters.\n\nRationale: SELinux must be enabled at boot time in your grub configuration to ensure that the controls it provides are not overridden."
+  impact 1.0
+  describe.one do
+    describe file("/boot/grub/grub.cfg") do
+      its("content") { should_not match(/^\s*linux\S*(\s+\S+)+\s+selinux=0/) }
+    end
+    describe file("/boot/grub/grub.cfg") do
+      its("content") { should_not match(/^\s*linux\S*(\s+\S+)+\s+enforcing=0/) }
+    end
+    describe package("selinux") do
+      it { should_not be_installed }
+    end
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_1.6.1.2_Ensure_the_SELinux_state_is_enforcing" do
+  title "Ensure the SELinux state is enforcing"
+  desc  "Set SELinux to enable when the system is booted.\n\nRationale: SELinux must be enabled at boot time in to ensure that the controls it provides are in effect at all times."
+  impact 1.0
+  describe.one do
+    describe file("/etc/selinux/config") do
+      its("content") { should match(/^\s*SELINUX\s*=\s*enforcing\s*(\s+#.*)?$/) }
+    end
+    a = command("sestatus").stdout.scan(/.+/)
+    describe a do
+      its("length") { should be > 0 }
+    end
+    a.each do |entry|
+      describe entry do
+        it { should match(/^SELinux status:\s+enabled$/) }
+      end
+    end
+    a = command("sestatus").stdout.scan(/.+/)
+    describe a do
+      its("length") { should be > 0 }
+    end
+    a.each do |entry|
+      describe entry do
+        it { should match(/^Current mode:\s+enforcing$/) }
+      end
+    end
+    a = command("sestatus").stdout.scan(/.+/)
+    describe a do
+      its("length") { should be > 0 }
+    end
+    a.each do |entry|
+      describe entry do
+        it { should match(/^Mode from config file:\s+enforcing$/) }
+      end
+    end
+    describe package("selinux") do
+      it { should_not be_installed }
+    end
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_1.6.1.3_Ensure_SELinux_policy_is_configured" do
+  title "Ensure SELinux policy is configured"
+  desc  "Configure SELinux to meet or exceed the default targeted policy, which constrains daemons and system software only.\n\nRationale: Security configuration requirements vary from site to site. Some sites may mandate a policy that is stricter than the default policy, which is perfectly acceptable. This item is intended to ensure that at least the default recommendations are met."
+  impact 1.0
+  describe.one do
+    describe file("/etc/selinux/config") do
+      its("content") { should match(/^\s*SELINUXTYPE\s*=\s*(ubuntu|default|mls)\s*(\s+#.*)?$/) }
+    end
+    a = command("sestatus").stdout.scan(/.+/)
+    describe a do
+      its("length") { should be > 0 }
+    end
+    a.each do |entry|
+      describe entry do
+        it { should match(/^Policy from config file:\s+(ubuntu|default|mls)$/) }
+      end
+    end
+    describe package("selinux") do
+      it { should_not be_installed }
+    end
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_1.6.1.4_Ensure_no_unconfined_daemons_exist" do
+  title "Ensure no unconfined daemons exist"
+  desc  "Daemons that are not defined in SELinux policy will inherit the security context of their parent process.\n\nRationale: Since daemons are launched and descend from the init process, they will inherit the security context label initrc_t. This could cause the unintended consequence of giving the process more permission than it requires."
+  impact 1.0
+  describe.one do
+    processes(/.*/).where { pid > 0 }.entries.each do |entry|
+      describe entry.label.to_s.split(":")[2] do
+        it { should_not cmp "initrc_t" }
+      end
+    end
+    describe package("selinux") do
+      it { should_not be_installed }
+    end
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_1.6.2.1_Ensure_AppArmor_is_not_disabled_in_bootloader_configuration" do
+  title "Ensure AppArmor is not disabled in bootloader configuration"
+  desc  "Configure AppArmor to be enabled at boot time and verify that it has not been overwritten by the bootloader boot parameters.\n\nRationale: AppArmor must be enabled at boot time in your bootloader configuration to ensure that the controls it provides are not overridden."
+  impact 1.0
+  describe.one do
+    describe file("/boot/grub/grub.cfg") do
+      its("content") { should_not match(/^\s*linux\S*(\s+\S+)+\s+apparmor=0/) }
+    end
+    describe package("apparmor") do
+      it { should_not be_installed }
+    end
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_1.6.2.2_Ensure_all_AppArmor_Profiles_are_enforcing" do
+  title "Ensure all AppArmor Profiles are enforcing"
+  desc  "AppArmor profiles define what resources applications are able to access.\n\nRationale: Security configuration requirements vary from site to site. Some sites may mandate a policy that is stricter than the default policy, which is perfectly acceptable. This item is intended to ensure that any policies that exist on the system are activated."
+  impact 1.0
+  describe.one do
+    describe command("apparmor_status --profiled") do
+      its("stdout") { should cmp > 0 }
+    end
+    describe command("apparmor_status --complaining") do
+      its("stdout") { should cmp == 0 }
+    end
+    describe command("apparmor_status").stdout.scan(/^(\d+).*unconfined/).flatten do
+      it { should cmp == 0 }
+    end
+    describe package("apparmor") do
+      it { should_not be_installed }
+    end
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_1.6.3_Ensure_SELinux_or_AppArmor_are_installed" do
+  title "Ensure SELinux or AppArmor are installed"
+  desc  "SELinux and AppArmor provide Mandatory Access Controls.\n\nRationale: Without a Mandatory Access Control system installed only the default Discretionary Access Control system will be available."
+  impact 0.0
+  describe.one do
+    describe package("selinux") do
+      it { should be_installed }
+    end
+    describe package("apparmor") do
+      it { should be_installed }
+    end
   end
 end
 
@@ -1018,27 +1217,26 @@ control "xccdf_org.cisecurity.benchmarks_rule_2.2.1.2_Ensure_ntp_is_configured" 
     end
   end
 end
-# disabled by Ranbir for base AMI - can be enabled for CI version post bootstrap
-# if an existing remote server is reachable
-# control "xccdf_org.cisecurity.benchmarks_rule_2.2.1.3_Ensure_chrony_is_configured" do
-#   title "Ensure chrony is configured"
-#   desc  "chrony is a daemon which implements the Network Time Protocol (NTP) is designed to synchronize system clocks across a variety of systems and use a source that is highly accurate. More information on chrony can be found at http://chrony.tuxfamily.org/\n                      . chrony can be configured to be a client and/or a server.\n\nRationale: If chrony is in use on the system proper configuration is vital to ensuring time synchronization is working properly.\n                    This recommendation only applies if chrony is in use on the system."
-#   impact 1.0
-#   describe.one do
-#     describe file("/etc/chrony/chrony.conf") do
-#       its("content") { should match(/^\s*server\s+\S+/) }
-#     end
-#     processes(/^chronyd/).where { pid > 0 }.entries.each do |entry|
-#       a = passwd.where { user == "_chrony" }.uids.first
-#       describe user(entry.user) do
-#         its("uid") { should cmp a }
-#       end
-#     end
-#     describe package("chrony") do
-#       it { should_not be_installed }
-#     end
-#   end
-# end
+
+control "xccdf_org.cisecurity.benchmarks_rule_2.2.1.3_Ensure_chrony_is_configured" do
+  title "Ensure chrony is configured"
+  desc  "chrony is a daemon which implements the Network Time Protocol (NTP) is designed to synchronize system clocks across a variety of systems and use a source that is highly accurate. More information on chrony can be found at http://chrony.tuxfamily.org/\n                      . chrony can be configured to be a client and/or a server.\n\nRationale: If chrony is in use on the system proper configuration is vital to ensuring time synchronization is working properly.\n                    This recommendation only applies if chrony is in use on the system."
+  impact 1.0
+  describe.one do
+    describe file("/etc/chrony/chrony.conf") do
+      its("content") { should match(/^\s*server\s+\S+/) }
+    end
+    processes(/^chronyd/).where { pid > 0 }.entries.each do |entry|
+      a = passwd.where { user == "_chrony" }.uids.first
+      describe user(entry.user) do
+        its("uid") { should cmp a }
+      end
+    end
+    describe package("chrony") do
+      it { should_not be_installed }
+    end
+  end
+end
 
 control "xccdf_org.cisecurity.benchmarks_rule_2.2.2_Ensure_X_Window_System_is_not_installed" do
   title "Ensure X Window System is not installed"
@@ -1251,9 +1449,15 @@ control "xccdf_org.cisecurity.benchmarks_rule_2.2.15_Ensure_mail_transfer_agent_
   title "Ensure mail transfer agent is configured for local-only mode"
   desc  "Mail Transfer Agents (MTA), such as sendmail and Postfix, are used to listen for incoming mail and transfer the messages to the appropriate user or mail server. If the system is not intended to be a mail server, it is recommended that the MTA be configured to only process local mail.\n\nRationale: The software for all Mail Transfer Agents is complex and most have a long history of security issues. While it is important to ensure that the system can process local mail messages, it is not necessary to have the MTA's daemon listening on a port unless the server is intended to be a mail server that receives and processes mail from other systems."
   impact 1.0
-  describe port(25).where { protocol =~ /.*/ && address =~ /^(?!127\.0\.0\.1|::1).*$/ } do
-    its("entries") { should be_empty }
+  describe service('postfix') do
+    it { should be_installed }
+    it { should be_enabled }
+    it { should be_running }
   end
+  # Disabled by Ranbir
+  # describe port(25).where { protocol =~ /.*/ && address =~ /^(?!127\.0\.0\.1|::1).*$/ } do
+  #   its("entries") { should be_empty }
+  # end
 end
 
 control "xccdf_org.cisecurity.benchmarks_rule_2.2.16_Ensure_rsync_service_is_not_enabled" do
@@ -1536,17 +1740,15 @@ control "xccdf_org.cisecurity.benchmarks_rule_3.3.2_Ensure_IPv6_redirects_are_no
   end
 end
 
-control "xccdf_org.cisecurity.benchmarks_rule_3.3.3_Ensure_IPv6_is_disabled" do
-  title "Ensure IPv6 is disabled"
-  desc  "Although IPv6 has many advantages over IPv4, few organizations have implemented IPv6.\n\nRationale: If IPv6 is not to be used, it is recommended that it be disabled to reduce the attack surface of the system."
-  impact 0.0
-  describe command('cat /proc/sys/net/ipv6/conf/all/disable_ipv6') do
-    its('stdout') { should match (/1/) }
-  end
-  # describe file("/boot/grub/grub.cfg") do
-  #   its("content") { should match(/^\s*linux\S*(\s+\S+)+\s+ipv6\.disable=1/) }
-  # end
-end
+# Disabled - need to use sysctl test
+# control "xccdf_org.cisecurity.benchmarks_rule_3.3.3_Ensure_IPv6_is_disabled" do
+#   title "Ensure IPv6 is disabled"
+#   desc  "Although IPv6 has many advantages over IPv4, few organizations have implemented IPv6.\n\nRationale: If IPv6 is not to be used, it is recommended that it be disabled to reduce the attack surface of the system."
+#   impact 0.0
+#   describe file("/boot/grub/grub.cfg") do
+#     its("content") { should match(/^\s*linux\S*(\s+\S+)+\s+ipv6\.disable=1/) }
+#   end
+# end
 
 control "xccdf_org.cisecurity.benchmarks_rule_3.4.1_Ensure_TCP_Wrappers_is_installed" do
   title "Ensure TCP Wrappers is installed"
@@ -1565,8 +1767,8 @@ control "xccdf_org.cisecurity.benchmarks_rule_3.4.2_Ensure_etchosts.allow_is_con
     it { should exist }
   end
 end
+
 # disabled by Ranbir - will discuss with team but if using AWS Sec groups we can
-# leverage that rather then shutting down via hosts.deny
 # control "xccdf_org.cisecurity.benchmarks_rule_3.4.3_Ensure_etchosts.deny_is_configured" do
 #   title "Ensure /etc/hosts.deny is configured"
 #   desc  "The /etc/hosts.deny file specifies which IP addresses are not permitted to connect to the host. It is intended to be used in conjunction with the /etc/hosts.allow file.\n\nRationale: The /etc/hosts.deny file serves as a failsafe so that any host not specified in /etc/hosts.allow is denied access to the system."
@@ -1574,17 +1776,7 @@ end
 #   describe file("/etc/hosts.deny") do
 #     its("content") { should match(/^ALL: ALL/) }
 #   end
-
-control "xccdf_org.cisecurity.benchmarks_rule_3.4.3_Ensure_etchosts.deny_is_configured" do
-  title "Ensure /etc/hosts.deny is configured"
-  desc  "The /etc/hosts.deny file specifies which IP addresses are not permitted to connect to the host. It is intended to be used in conjunction with the /etc/hosts.allow file.\n\nRationale: The /etc/hosts.deny file serves as a failsafe so that any host not specified in /etc/hosts.allow is denied access to the system."
-  impact 1.0
-  describe file("/etc/hosts.deny") do
-    it { should exist }
-  end
-end
-
-
+# end
 
 control "xccdf_org.cisecurity.benchmarks_rule_3.4.4_Ensure_permissions_on_etchosts.allow_are_configured" do
   title "Ensure permissions on /etc/hosts.allow are configured"
@@ -1800,8 +1992,7 @@ control "xccdf_org.cisecurity.benchmarks_rule_3.6.1_Ensure_iptables_is_installed
     it { should be_installed }
   end
 end
-# disabled - need to review with Nic - but as we're using AWS SG to protect
-# interfaces this will conflict
+# disabled - need to review with Nic - but as we're using AWS SG to protect we don't want to confict
 # control "xccdf_org.cisecurity.benchmarks_rule_3.6.2_Ensure_default_deny_firewall_policy" do
 #   title "Ensure default deny firewall policy"
 #   desc  "A default deny all policy on connections ensures that any unconfigured network usage will be rejected.\n\nRationale: With a default accept policy the firewall will accept any packet that is not configured to be denied. It is easier to white list acceptable usage than to black list unacceptable usage."
@@ -1904,6 +2095,345 @@ control "xccdf_org.cisecurity.benchmarks_rule_3.7_Ensure_wireless_interfaces_are
   impact 0.0
 end
 
+control "xccdf_org.cisecurity.benchmarks_rule_4.1.1.1_Ensure_audit_log_storage_size_is_configured" do
+  title "Ensure audit log storage size is configured"
+  desc  "Configure the maximum size of the audit log file. Once the log reaches the maximum size, it will be rotated and a new log file will be started.\n\nRationale: It is important that an appropriate size is determined for log files so that they do not impact the system and audit data is not lost."
+  impact 0.0
+  describe file("/etc/audit/auditd.conf") do
+    its("content") { should match(/^\s*max_log_file\s*=\s*\S+\s*(\s+#.*)?$/) }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_4.1.1.2_Ensure_system_is_disabled_when_audit_logs_are_full" do
+  title "Ensure system is disabled when audit logs are full"
+  desc  "The auditd daemon can be configured to halt the system when the audit logs are full.\n\nRationale: In high security contexts, the risk of detecting unauthorized access or nonrepudiation exceeds the benefit of the system's availability."
+  impact 1.0
+  describe file("/etc/audit/auditd.conf") do
+    its("content") { should match(/^\s*space_left_action\s*=\s*email\s*(\s+#.*)?$/) }
+  end
+  describe file("/etc/audit/auditd.conf") do
+    its("content") { should match(/^\s*action_mail_acct\s*=\s*root\s*(\s+#.*)?$/) }
+  end
+  describe file("/etc/audit/auditd.conf") do
+    its("content") { should match(/^\s*admin_space_left_action\s*=\s*halt\s*(\s+#.*)?$/) }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_4.1.1.3_Ensure_audit_logs_are_not_automatically_deleted" do
+  title "Ensure audit logs are not automatically deleted"
+  desc  "The max_log_file_action setting determines how to handle the audit log file reaching the max file size. A value of keep_logs will rotate the logs but never delete old logs.\n\nRationale: In high security contexts, the benefits of maintaining a long audit history exceed the cost of storing the audit history."
+  impact 1.0
+  describe file("/etc/audit/auditd.conf") do
+    its("content") { should match(/^\s*max_log_file_action\s*=\s*keep_logs\s*(\s+#.*)?$/) }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_4.1.2_Ensure_auditd_service_is_enabled" do
+  title "Ensure auditd service is enabled"
+  desc  "Turn on the auditd daemon to record system events.\n\nRationale: The capturing of system events provides system administrators with information to allow them to determine if unauthorized access to their system is occurring."
+  impact 1.0
+  a = command("systemctl is-enabled auditd.service").stdout.scan(/enabled/)
+  describe a do
+    its("length") { should be > 0 }
+  end
+  a.each do |entry|
+    describe entry do
+      it { should match(/.+/) }
+    end
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_4.1.3_Ensure_auditing_for_processes_that_start_prior_to_auditd_is_enabled" do
+  title "Ensure auditing for processes that start prior to auditd is enabled"
+  desc  "Configure grub so that processes that are capable of being audited can be audited even if they start up prior to auditd startup.\n\nRationale: Audit events need to be captured on processes that start up prior to auditd, so that potential malicious activity cannot go undetected."
+  impact 1.0
+  describe file("/boot/grub/grub.cfg") do
+    its("content") { should match(/^\s*linux\S*(\s+\S+)+\s+audit=1/) }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_4.s1.4_Ensure_events_that_modify_date_and_time_information_are_collected" do
+  title "Ensure events that modify date and time information are collected"
+  desc  "Capture events where the system date and/or time has been modified. The parameters in this section are set to determine if the adjtimex (tune kernel clock), settimeofday (Set time, using timeval and timezone structures) stime (using seconds since 1/1/1970) or clock_settime (allows for the setting of several internal clocks and timers) system calls have been executed and always write an audit record to the /var/log/audit.log file upon exit, tagging the records with the identifier \"time-change\"\n\nRationale: Unexpected changes in system date and/or time could be a sign of malicious activity on the system."
+  impact 1.0
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match(/^-a\s+(always,exit|exit,always)\s+-F\s+arch=b32\s+-S\s+adjtimex\s+-S\s+settimeofday\s+-S\s+stime\s+-k\s+time-change *$/) }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match(/^-a\s+(always,exit|exit,always)\s+-F\s+arch=b32\s+-S\s+clock_settime\s+-k\s+time-change *$/) }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match(/^-w\s+\/etc\/localtime\s+-p\s+wa\s+-k\s+time-change *$/) }
+  end
+  describe.one do
+    describe file("/etc/audit/audit.rules") do
+      its("content") { should match(/^-a\s+(always,exit|exit,always)\s+-F\s+arch=b64\s+-S\s+adjtimex\s+-S\s+settimeofday\s+-k\s+time-change *$/) }
+    end
+    describe file("/etc/audit/audit.rules") do
+      its("content") { should match(/^-a\s+(always,exit|exit,always)\s+-F\s+arch=b64\s+-S\s+clock_settime\s+-k\s+time-change *$/) }
+    end
+    describe command("uname -m").stdout do
+      its("strip") { should_not eq "x86_64" }
+    end
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_4.1.5_Ensure_events_that_modify_usergroup_information_are_collected" do
+  title "Ensure events that modify user/group information are collected"
+  desc  "Record events affecting the group, passwd (user IDs), shadow and gshadow (passwords) or /etc/security/opasswd (old passwords, based on remember parameter in the PAM configuration) files. The parameters in this section will watch the files to see if they have been opened for write or have had attribute changes (e.g. permissions) and tag them with the identifier \"identity\" in the audit log file.\n\nRationale: Unexpected changes to these files could be an indication that the system has been compromised and that an unauthorized user is attempting to hide their activities or compromise additional accounts."
+  impact 1.0
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match(/^-w\s+\/etc\/group\s+-p\s+wa\s+-k\s+identity *$/) }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match(/^-w\s+\/etc\/passwd\s+-p\s+wa\s+-k\s+identity *$/) }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match(/^-w\s+\/etc\/gshadow\s+-p\s+wa\s+-k\s+identity *$/) }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match(/^-w\s+\/etc\/shadow\s+-p\s+wa\s+-k\s+identity *$/) }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match(/^-w\s+\/etc\/security\/opasswd\s+-p\s+wa\s+-k\s+identity *$/) }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_4.1.6_Ensure_events_that_modify_the_systems_network_environment_are_collected" do
+  title "Ensure events that modify the system's network environment are collected"
+  desc  "Record changes to network environment files or system calls. The below parameters monitor the sethostname (set the systems host name) or setdomainname (set the systems domainname) system calls, and write an audit event on system call exit. The other parameters monitor the /etc/issue and /etc/issue.net files (messages displayed pre-login), /etc/hosts (file containing host names and associated IP addresses) and /etc/sysconfig/network (directory containing network interface scripts and configurations) files.\n\nRationale: Monitoring sethostname and setdomainname will identify potential unauthorized changes to host and domainname of a system. The changing of these names could potentially break security parameters that are set based on those names. The /etc/hosts file is monitored for changes in the file that can indicate an unauthorized intruder is trying to change machine associations with IP addresses and trick users and processes into connecting to unintended machines. Monitoring /etc/issue and /etc/issue.net is important, as intruders could put disinformation into those files and trick users into providing information to the intruder. Monitoring /etc/sysconfig/network is important as it can show if network interfaces or scripts are being modified in a way that can lead to the machine becoming unavailable or compromised. All audit records will be tagged with the identifier \"system-locale.\""
+  impact 1.0
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match(/^-a\s+(always,exit|exit,always)\s+-F\s+arch=b32\s+-S\s+sethostname\s+-S\s+setdomainname\s+-k\s+system-locale *$/) }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match(/^-w\s+\/etc\/issue\s+-p\s+wa\s+-k\s+system-locale *$/) }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match(/^-w\s+\/etc\/issue.net\s+-p\s+wa\s+-k\s+system-locale *$/) }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match(/^-w\s+\/etc\/hosts\s+-p\s+wa\s+-k\s+system-locale *$/) }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match(/^-w\s+\/etc\/network\s+-p\s+wa\s+-k\s+system-locale *$/) }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match(/^-w\s+\/etc\/networks\s+-p\s+wa\s+-k\s+system-locale *$/) }
+  end
+  describe.one do
+    describe file("/etc/audit/audit.rules") do
+      its("content") { should match(/^-a\s+(always,exit|exit,always)\s+-F\s+arch=b64\s+-S\s+sethostname\s+-S\s+setdomainname\s+-k\s+system-locale *$/) }
+    end
+    describe command("uname -m").stdout do
+      its("strip") { should_not eq "x86_64" }
+    end
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_4.1.7_Ensure_events_that_modify_the_systems_Mandatory_Access_Controls_are_collected" do
+  title "Ensure events that modify the system's Mandatory Access Controls are collected"
+  desc  "Monitor SELinux/AppArmor mandatory access controls. The parameters below monitor any write access (potential additional, deletion or modification of files in the directory) or attribute changes to the /etc/selinux or /etc/apparmor and /etc/apparmor.d directories.\n\nRationale: Changes to files in these directories could indicate that an unauthorized user is attempting to modify access controls and change security contexts, leading to a compromise of the system."
+  impact 1.0
+  describe.one do
+    describe file("/etc/audit/audit.rules") do
+      its("content") { should match(/^-w\s+\/etc\/selinux\/\s+-p\s+wa\s+-k\s+MAC-policy *$/) }
+    end
+    describe file("/etc/audit/audit.rules") do
+      its("content") { should match(/^-w\s+\/etc\/apparmor\/\s+-p\s+wa\s+-k\s+MAC-policy *$/) }
+    end
+    describe file("/etc/audit/audit.rules") do
+      its("content") { should match(/^-w\s+\/etc\/apparmor.d\/\s+-p\s+wa\s+-k\s+MAC-policy *$/) }
+    end
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_4.1.8_Ensure_login_and_logout_events_are_collected" do
+  title "Ensure login and logout events are collected"
+  desc  "Monitor login and logout events. The parameters below track changes to files associated with login/logout events. The file /var/log/faillog tracks failed events from login. The file /var/log/lastlog maintain records of the last time a user successfully logged in. The file /var/log/tallylog maintains records of failures via the pam_tally2 module\n\nRationale: Monitoring login/logout events could provide a system administrator with information associated with brute force attacks against user logins."
+  impact 1.0
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match(/^-w\s+\/var\/log\/faillog\s+-p\s+wa\s+-k\s+logins *$/) }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match(/^-w\s+\/var\/log\/lastlog\s+-p\s+wa\s+-k\s+logins *$/) }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match(/^-w\s+\/var\/log\/tallylog\s+-p\s+wa\s+-k\s+logins *$/) }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_4.1.9_Ensure_session_initiation_information_is_collected" do
+  title "Ensure session initiation information is collected"
+  desc  "Monitor session initiation events. The parameters in this section track changes to the files associated with session events. The file /var/run/utmp file tracks all currently logged in users. The /var/log/wtmp file tracks logins, logouts, shutdown, and reboot events. All audit records will be tagged with the identifier \"session.\" The file /var/log/btmp keeps track of failed login attempts and can be read by entering the command /usr/bin/last -f /var/log/btmp. All audit records will be tagged with the identifier \"logins.\"\n\nRationale: Monitoring these files for changes could alert a system administrator to logins occurring at unusual hours, which could indicate intruder activity (i.e. a user logging in at a time when they do not normally log in)."
+  impact 1.0
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match(/^-w\s+\/var\/run\/utmp\s+-p\s+wa\s+-k\s+session *$/) }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match(/^-w\s+\/var\/log\/wtmp\s+-p\s+wa\s+-k\s+session *$/) }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match(/^-w\s+\/var\/log\/btmp\s+-p\s+wa\s+-k\s+session *$/) }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_4.1.10_Ensure_discretionary_access_control_permission_modification_events_are_collected" do
+  title "Ensure discretionary access control permission modification events are collected"
+  desc  "Monitor changes to file permissions, attributes, ownership and group. The parameters in this section track changes for system calls that affect file permissions and attributes. The chmod, fchmod and fchmodat system calls affect the permissions associated with a file. The chown, fchown, fchownat and lchown system calls affect owner and group attributes on a file. The setxattr, lsetxattr, fsetxattr (set extended file attributes) and removexattr, lremovexattr, fremovexattr (remove extended file attributes) control extended file attributes. In all cases, an audit record will only be written for non-system user ids (auid >= 1000) and will ignore Daemon events (auid = 4294967295). All audit records will be tagged with the identifier \"perm_mod.\"\n\nRationale: Monitoring for changes in file attributes could alert a system administrator to activity that could indicate intruder activity or policy violation."
+  impact 1.0
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match(/^-a\s+(always,exit|exit,always)\s+-F\s+arch=b32\s+-S\s+chmod\s+-S\s+fchmod\s+-S\s+fchmodat\s+-F\s+auid>=1000\s+-F\s+auid!=4294967295\s+-k\s+perm_mod *$/) }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match(/^-a\s+(always,exit|exit,always)\s+-F\s+arch=b32\s+-S\s+chown\s+-S\s+fchown\s+-S\s+fchownat\s+-S\s+lchown\s+-F\s+auid>=1000\s+-F\s+auid!=4294967295\s+-k\s+perm_mod *$/) }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match(/^-a\s+(always,exit|exit,always)\s+-F\s+arch=b32\s+-S\s+setxattr\s+-S\s+lsetxattr\s+-S\s+fsetxattr\s+-S\s+removexattr\s+-S\s+lremovexattr\s+-S\s+fremovexattr\s+-F\s+auid>=1000\s+-F\s+auid!=4294967295\s+-k\s+perm_mod *$/) }
+  end
+  describe.one do
+    describe file("/etc/audit/audit.rules") do
+      its("content") { should match(/^-a\s+(always,exit|exit,always)\s+-F\s+arch=b64\s+-S\s+chmod\s+-S\s+fchmod\s+-S\s+fchmodat\s+-F\s+auid>=1000\s+-F\s+auid!=4294967295\s+-k\s+perm_mod *$/) }
+    end
+    describe file("/etc/audit/audit.rules") do
+      its("content") { should match(/^-a\s+(always,exit|exit,always)\s+-F\s+arch=b64\s+-S\s+chown\s+-S\s+fchown\s+-S\s+fchownat\s+-S\s+lchown\s+-F\s+auid>=1000\s+-F\s+auid!=4294967295\s+-k\s+perm_mod *$/) }
+    end
+    describe file("/etc/audit/audit.rules") do
+      its("content") { should match(/^-a\s+(always,exit|exit,always)\s+-F\s+arch=b64\s+-S\s+setxattr\s+-S\s+lsetxattr\s+-S\s+fsetxattr\s+-S\s+removexattr\s+-S\s+lremovexattr\s+-S\s+fremovexattr\s+-F\s+auid>=1000\s+-F\s+auid!=4294967295\s+-k\s+perm_mod *$/) }
+    end
+    describe command("uname -m").stdout do
+      its("strip") { should_not eq "x86_64" }
+    end
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_4.1.11_Ensure_unsuccessful_unauthorized_file_access_attempts_are_collected" do
+  title "Ensure unsuccessful unauthorized file access attempts are collected"
+  desc  "Monitor for unsuccessful attempts to access files. The parameters below are associated with system calls that control creation (creat), opening (open, openat) and truncation (truncate, ftruncate) of files. An audit log record will only be written if the user is a non-privileged user (auid > = 1000), is not a Daemon event (auid=4294967295) and if the system call returned EACCES (permission denied to the file) or EPERM (some other permanent error associated with the specific system call). All audit records will be tagged with the identifier \"access.\"\n\nRationale: Failed attempts to open, create or truncate files could be an indication that an individual or process is trying to gain unauthorized access to the system."
+  impact 1.0
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match(/^-a\s+(always,exit|exit,always)\s+-F\s+arch=b32\s+-S\s+creat\s+-S\s+open\s+-S\s+openat\s+-S\s+truncate\s+-S\s+ftruncate\s+-F\s+exit=-EACCES\s+-F\s+auid>=1000\s+-F\s+auid!=4294967295\s+-k\s+access *$/) }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match(/^-a\s+(always,exit|exit,always)\s+-F\s+arch=b32\s+-S\s+creat\s+-S\s+open\s+-S\s+openat\s+-S\s+truncate\s+-S\s+ftruncate\s+-F\s+exit=-EPERM\s+-F\s+auid>=1000\s+-F\s+auid!=4294967295\s+-k\s+access *$/) }
+  end
+  describe.one do
+    describe file("/etc/audit/audit.rules") do
+      its("content") { should match(/^-a\s+(always,exit|exit,always)\s+-F\s+arch=b64\s+-S\s+creat\s+-S\s+open\s+-S\s+openat\s+-S\s+truncate\s+-S\s+ftruncate\s+-F\s+exit=-EACCES\s+-F\s+auid>=1000\s+-F\s+auid!=4294967295\s+-k\s+access *$/) }
+    end
+    describe file("/etc/audit/audit.rules") do
+      its("content") { should match(/^-a\s+(always,exit|exit,always)\s+-F\s+arch=b64\s+-S\s+creat\s+-S\s+open\s+-S\s+openat\s+-S\s+truncate\s+-S\s+ftruncate\s+-F\s+exit=-EPERM\s+-F\s+auid>=1000\s+-F\s+auid!=4294967295\s+-k\s+access *$/) }
+    end
+    describe command("uname -m").stdout do
+      its("strip") { should_not eq "x86_64" }
+    end
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_4.1.12_Ensure_use_of_privileged_commands_is_collected" do
+  title "Ensure use of privileged commands is collected"
+  desc  "Monitor privileged programs (those that have the setuid and/or setgid bit set on execution) to determine if unprivileged users are running these commands.\n\nRationale: Execution of privileged commands by non-privileged users could be an indication of someone trying to gain unauthorized access to the system."
+  impact 1.0
+  command("find / -regex .\\*/.\\+ -type f -perm /06000 -xdev").stdout.split.map { |x| "^\\-a (always,exit|exit,always) \\-F path=" + x.to_s }.map { |x| x.to_s + " \\-F perm=x \\-F auid>=1000 \\-F auid!=4294967295 \\-k privileged$" }.each do |entry|
+    describe file("/etc/audit/audit.rules") do
+      its("content") { should match Regexp.new(entry) }
+    end
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_4.1.13_Ensure_successful_file_system_mounts_are_collected" do
+  title "Ensure successful file system mounts are collected"
+  desc  "Monitor the use of the mount system call. The mount (and umount) system call controls the mounting and unmounting of file systems. The parameters below configure the system to create an audit record when the mount system call is used by a non-privileged user\n\nRationale: It is highly unusual for a non privileged user to mount file systems to the system. While tracking mount commands gives the system administrator evidence that external media may have been mounted (based on a review of the source of the mount and confirming it's an external media type), it does not conclusively indicate that data was exported to the media. System administrators who wish to determine if data were exported, would also have to track successful open, creat and truncate system calls requiring write access to a file under the mount point of the external media file system. This could give a fair indication that a write occurred. The only way to truly prove it, would be to track successful writes to the external media. Tracking write system calls could quickly fill up the audit log and is not recommended. Recommendations on configuration options to track data export to media is beyond the scope of this document."
+  impact 1.0
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match(/^-a\s+(always,exit|exit,always)\s+-F\s+arch=b32\s+-S\s+mount\s+-F\s+auid>=1000\s+-F\s+auid!=4294967295\s+-k\s+mounts *$/) }
+  end
+  describe.one do
+    describe file("/etc/audit/audit.rules") do
+      its("content") { should match(/^-a\s+(always,exit|exit,always)\s+-F\s+arch=b64\s+-S\s+mount\s+-F\s+auid>=1000\s+-F\s+auid!=4294967295\s+-k\s+mounts *$/) }
+    end
+    describe command("uname -m").stdout do
+      its("strip") { should_not eq "x86_64" }
+    end
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_4.1.14_Ensure_file_deletion_events_by_users_are_collected" do
+  title "Ensure file deletion events by users are collected"
+  desc  "Monitor the use of system calls associated with the deletion or renaming of files and file attributes. This configuration statement sets up monitoring for the unlink (remove a file), unlinkat (remove a file attribute), rename (rename a file) and renameat (rename a file attribute) system calls and tags them with the identifier \"delete\".\n\nRationale: Monitoring these calls from non-privileged users could provide a system administrator with evidence that inappropriate removal of files and file attributes associated with protected files is occurring. While this audit option will look at all events, system administrators will want to look for specific privileged files that are being deleted or altered."
+  impact 1.0
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match(/^-a\s+(always,exit|exit,always)\s+-F\s+arch=b32\s+-S\s+unlink\s+-S\s+unlinkat\s+-S\s+rename\s+-S\s+renameat\s+-F\s+auid>=1000\s+-F\s+auid!=4294967295\s+-k\s+delete *$/) }
+  end
+  describe.one do
+    describe file("/etc/audit/audit.rules") do
+      its("content") { should match(/^-a\s+(always,exit|exit,always)\s+-F\s+arch=b64\s+-S\s+unlink\s+-S\s+unlinkat\s+-S\s+rename\s+-S\s+renameat\s+-F\s+auid>=1000\s+-F\s+auid!=4294967295\s+-k\s+delete *$/) }
+    end
+    describe command("uname -m").stdout do
+      its("strip") { should_not eq "x86_64" }
+    end
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_4.1.15_Ensure_changes_to_system_administration_scope_sudoers_is_collected" do
+  title "Ensure changes to system administration scope (sudoers) is collected"
+  desc  "Monitor scope changes for system administrations. If the system has been properly configured to force system administrators to log in as themselves first and then use the sudo command to execute privileged commands, it is possible to monitor changes in scope. The file /etc/sudoers will be written to when the file or its attributes have changed. The audit records will be tagged with the identifier \"scope.\"\n\nRationale: Changes in the /etc/sudoers file can indicate that an unauthorized change has been made to scope of system administrator activity."
+  impact 1.0
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match(/^-w\s+\/etc\/sudoers\s+-p\s+wa\s+-k\s+scope *$/) }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match(/^-w\s+\/etc\/sudoers.d\s+-p\s+wa\s+-k\s+scope *$/) }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_4.1.16_Ensure_system_administrator_actions_sudolog_are_collected" do
+  title "Ensure system administrator actions (sudolog) are collected"
+  desc  "Monitor the sudo log file. If the system has been properly configured to disable the use of the su command and force all administrators to have to log in first and then use sudo to execute privileged commands, then all administrator commands will be logged to /var/log/sudo.log. Any time a command is executed, an audit event will be triggered as the /var/log/sudo.log file will be opened for write and the executed administration command will be written to the log.\n\nRationale: Changes in /var/log/sudo.log indicate that an administrator has executed a command or the log file itself has been tampered with. Administrators will want to correlate the events written to the audit trail with the records written to /var/log/sudo.log to verify if unauthorized commands have been executed."
+  impact 1.0
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match(/^-w\s+\/var\/log\/sudo.log\s+-p\s+wa\s+-k\s+actions *$/) }
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_4.1.17_Ensure_kernel_module_loading_and_unloading_is_collected" do
+  title "Ensure kernel module loading and unloading is collected"
+  desc  "Monitor the loading and unloading of kernel modules. The programs insmod (install a kernel module), rmmod (remove a kernel module), and modprobe (a more sophisticated program to load and unload modules, as well as some other features) control loading and unloading of modules. The init_module (load a module) and delete_module (delete a module) system calls control loading and unloading of modules. Any execution of the loading and unloading module programs and system calls will trigger an audit record with an identifier of \"modules\".\n\nRationale: Monitoring the use of insmod, rmmod and modprobe could provide system administrators with evidence that an unauthorized user loaded or unloaded a kernel module, possibly compromising the security of the system. Monitoring of the init_module and delete_module system calls would reflect an unauthorized user attempting to use a different program to load and unload modules."
+  impact 1.0
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match(/^-w\s+\/sbin\/insmod\s+-p\s+x\s+-k\s+modules *$/) }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match(/^-w\s+\/sbin\/rmmod\s+-p\s+x\s+-k\s+modules *$/) }
+  end
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match(/^-w\s+\/sbin\/modprobe\s+-p\s+x\s+-k\s+modules *$/) }
+  end
+  describe.one do
+    describe file("/etc/audit/audit.rules") do
+      its("content") { should match(/^-a\s+(always,exit|exit,always)\s+arch=b32\s+-S\s+init_module\s+-S\s+delete_module\s+-k\s+modules *$/) }
+    end
+    describe command("uname -m").stdout do
+      its("strip") { should_not eq "x86_64" }
+    end
+    describe file("/etc/audit/audit.rules") do
+      its("content") { should match(/^-a\s+(always,exit|exit,always)\s+arch=b64\s+-S\s+init_module\s+-S\s+delete_module\s+-k\s+modules *$/) }
+    end
+    describe command("uname -m").stdout do
+      its("strip") { should eq "x86_64" }
+    end
+  end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_4.1.18_Ensure_the_audit_configuration_is_immutable" do
+  title "Ensure the audit configuration is immutable"
+  desc  "Set system audit so that audit rules cannot be modified with auditctl. Setting the flag \"-e 2\" forces audit to be put in immutable mode. Audit changes can only be made on system reboot.\n\nRationale: In immutable mode, unauthorized users cannot execute changes to the audit system to potentially hide malicious activity and then put the audit rules back. Users would most likely notice a system reboot and that could alert administrators of an attempt to make unauthorized audit changes."
+  impact 1.0
+  describe file("/etc/audit/audit.rules") do
+    its("content") { should match(/^-e\s+2 *$/) }
+  end
+end
+
 control "xccdf_org.cisecurity.benchmarks_rule_4.2.1.1_Ensure_rsyslog_Service_is_enabled" do
   title "Ensure rsyslog Service is enabled"
   desc  "Once the rsyslog package is installed it needs to be activated.\n\nRationale: If the rsyslog service is not activated the system may default to the syslogd service or lack logging instead."
@@ -1943,8 +2473,7 @@ control "xccdf_org.cisecurity.benchmarks_rule_4.2.1.3_Ensure_rsyslog_default_fil
     end
   end
 end
-
-# disabled for base image - will be reconfigured in CI based configs based on logging collectors used
+# disabled - Ranbir - will be set to use local log forwarding agent post bootstrap
 # control "xccdf_org.cisecurity.benchmarks_rule_4.2.1.4_Ensure_rsyslog_is_configured_to_send_logs_to_a_remote_log_host" do
 #   title "Ensure rsyslog is configured to send logs to a remote log host"
 #   desc  "The rsyslog utility supports the ability to send logs it gathers to a remote log host running syslogd(8) or to receive messages from remote hosts, reducing administrative overhead.\n\nRationale: Storing log data on a remote host protects log integrity from local attacks. If an attacker gains root access on the local system, they could tamper with or remove log data that is stored on the local system"
@@ -2534,10 +3063,10 @@ control "xccdf_org.cisecurity.benchmarks_rule_5.2.13_Ensure_SSH_LoginGraceTime_i
   end
 end
 
-# disabled by Ranbir - allows for AWS SGs to do this with no conflict
+# disabled - will use AWS SG instead
 # control "xccdf_org.cisecurity.benchmarks_rule_5.2.14_Ensure_SSH_access_is_limited" do
 #   title "Ensure SSH access is limited"
-#   desc  "There are several options available to limit which users and group can access the system via SSH. It is recommended that at least one of the following options be leveraged:\n               \n                   AllowUsers\n                  \n                The AllowUsers variable gives the system administrator the option of allowing specific users to ssh into the system. The list consists of comma separated user names. Numeric user IDs are not recognized with this variable. If a #system administrator wants to restrict user access further by only allowing the allowed users to log in from a particular host, the entry can be specified in the form of user@host.\n               \n                   AllowGroups\n                  \n                The AllowGroups variable gives the system administrator the option of allowing specific groups of users to ssh into the system. The list consists of comma separated group names. Numeric group IDs are not recognized with this variable.\n               \n                   DenyUsers\n                  \n                The DenyUsers variable gives the system administrator the option of denying specific users to ssh into the system. The list consists of comma separated user names. Numeric user IDs are not recognized with this variable. If a system administrator wants to restrict user access further by specifically denying a user's access from a particular host, the entry can be specified in the form of # user@host.\n               \n                   DenyGroups\n                  \n                The DenyGroups variable gives the system administrator the option of denying specific groups of users to ssh into the system. The list consists of comma separated group names. Numeric group IDs are not recognized with this variable.\n\nRationale: Restricting which users can remotely access the system via SSH will help ensure that only authorized users access the system."
+#   desc  "There are several options available to limit which users and group can access the system via SSH. It is recommended that at least one of the following options be leveraged:\n               \n                   AllowUsers\n                  \n                The AllowUsers variable gives the system administrator the option of allowing specific users to ssh into the system. The list consists of comma separated user names. Numeric user IDs are not recognized with this variable. If a system administrator wants to restrict user access further by only allowing the allowed users to log in from a particular host, the entry can be specified in the form of user@host.\n               \n                   AllowGroups\n                  \n                The AllowGroups variable gives the system administrator the option of allowing specific groups of users to ssh into the system. The list consists of comma separated group names. Numeric group IDs are not recognized with this variable.\n               \n                   DenyUsers\n                  \n                The DenyUsers variable gives the system administrator the option of denying specific users to ssh into the system. The list consists of comma separated user names. Numeric user IDs are not recognized with this variable. If a system administrator wants to restrict user access further by specifically denying a user's access from a particular host, the entry can be specified in the form of user@host.\n               \n                   DenyGroups\n                  \n                The DenyGroups variable gives the system administrator the option of denying specific groups of users to ssh into the system. The list consists of comma separated group names. Numeric group IDs are not recognized with this variable.\n\nRationale: Restricting which users can remotely access the system via SSH will help ensure that only authorized users access the system."
 #   impact 1.0
 #   describe file("/etc/ssh/sshd_config") do
 #     its("content") { should match(/^\s*(AllowUsers|AllowGroups|DenyUsers|DenyGroups)\s+(\S+)/) }
@@ -2740,6 +3269,12 @@ control "xccdf_org.cisecurity.benchmarks_rule_5.6_Ensure_access_to_the_su_comman
   describe file("/etc/pam.d/su") do
     its("content") { should match(/^\s*auth\s+required\s+pam_wheel.so\s+use_uid\s*$/) }
   end
+end
+
+control "xccdf_org.cisecurity.benchmarks_rule_6.1.1_Audit_system_file_permissions" do
+  title "Audit system file permissions"
+  desc  "The Debian package manager has a number of useful options. One of these, the --verify option, can be used to verify that system packages are correctly installed. The --verify option can be used to verify a particular package or to verify all system packages. If no output is returned, the package is installed correctly. The following table describes the meaning of output from the verify option: Code MeaningS File size differs.M File mode differs (includes permissions and file type).5 The MD5 checksum differs.D The major and minor version numbers differ on a device file.L A mismatch occurs in a link.U The file ownership differs.G The file group owner differs.T The file time (mtime) differs. The dpkg -S command can be used to determine which package a particular file belongs to. For example the following commands determines which package the /bin/bash file belongs to:\n                # dpkg -S /bin/bashbash: /bin/bash\n                To verify the settings for the package that controls the /bin/bash file, run the following: # dpkg --verify bash??5?????? c /etc/bash.bashrc\n\nRationale: It is important to confirm that packaged system files and directories are maintained with the permissions they were intended to have from the OS vendor."
+  impact 0.0
 end
 
 control "xccdf_org.cisecurity.benchmarks_rule_6.1.2_Ensure_permissions_on_etcpasswd_are_configured" do
@@ -3220,37 +3755,37 @@ control "xccdf_org.cisecurity.benchmarks_rule_6.2.6_Ensure_root_PATH_Integrity" 
     end
   end
 end
-
-control "xccdf_org.cisecurity.benchmarks_rule_6.2.7_Ensure_all_users_home_directories_exist" do
-  title "Ensure all users' home directories exist"
-  desc  "Users can be defined in /etc/passwd without a home directory or with a home directory that does not actually exist.\n\nRationale: If the user's home directory does not exist or is unassigned, the user will be placed in \"/\" and will not be able to write any files or have local environment variables set."
-  impact 1.0
-  passwd.where { user =~ /^(?!root|halt|sync|shutdown).*/ }.where { shell != "/sbin/nologin" }.homes.map { |x| x.to_s.split(":") }.flatten.each do |entry|
-    describe file(entry) do
-      it { should exist }
-    end
-  end
-end
-
-control "xccdf_org.cisecurity.benchmarks_rule_6.2.8_Ensure_users_home_directories_permissions_are_750_or_more_restrictive" do
-  title "Ensure users' home directories permissions are 750 or more restrictive"
-  desc  "While the system administrator can establish secure permissions for users' home directories, the users can easily override these.\n\nRationale: Group or world-writable user home directories may enable malicious users to steal or modify other users' data or to gain another user's system privileges."
-  impact 1.0
-  passwd.where { user =~ /^(?!root|halt|sync|shutdown).*/ }.where { shell != "/sbin/nologin" }.homes.map { |x| x.to_s.split(":") }.flatten.each do |entry|
-    describe file(entry) do
-      it { should_not be_writable.by "group" }
-    end
-    describe file(entry) do
-      it { should_not be_executable.by "other" }
-    end
-    describe file(entry) do
-      it { should_not be_readable.by "other" }
-    end
-    describe file(entry) do
-      it { should_not be_writable.by "other" }
-    end
-  end
-end
+# disabled until testing on AWS
+# control "xccdf_org.cisecurity.benchmarks_rule_6.2.7_Ensure_all_users_home_directories_exist" do
+#   title "Ensure all users' home directories exist"
+#   desc  "Users can be defined in /etc/passwd without a home directory or with a home directory that does not actually exist.\n\nRationale: If the user's home directory does not exist or is unassigned, the user will be placed in \"/\" and will not be able to write any files or have local environment variables set."
+#   impact 1.0
+#   passwd.where { user =~ /^(?!root|halt|sync|shutdown).*/ }.where { shell != "/sbin/nologin" }.homes.map { |x| x.to_s.split(":") }.flatten.each do |entry|
+#     describe file(entry) do
+#       it { should exist }
+#     end
+#   end
+# end
+#
+# control "xccdf_org.cisecurity.benchmarks_rule_6.2.8_Ensure_users_home_directories_permissions_are_750_or_more_restrictive" do
+#   title "Ensure users' home directories permissions are 750 or more restrictive"
+#   desc  "While the system administrator can establish secure permissions for users' home directories, the users can easily override these.\n\nRationale: Group or world-writable user home directories may enable malicious users to steal or modify other users' data or to gain another user's system privileges."
+#   impact 1.0
+#   passwd.where { user =~ /^(?!root|halt|sync|shutdown).*/ }.where { shell != "/sbin/nologin" }.homes.map { |x| x.to_s.split(":") }.flatten.each do |entry|
+#     describe file(entry) do
+#       it { should_not be_writable.by "group" }
+#     end
+#     describe file(entry) do
+#       it { should_not be_executable.by "other" }
+#     end
+#     describe file(entry) do
+#       it { should_not be_readable.by "other" }
+#     end
+#     describe file(entry) do
+#       it { should_not be_writable.by "other" }
+#     end
+#   end
+# end
 
 control "xccdf_org.cisecurity.benchmarks_rule_6.2.9_Ensure_users_own_their_home_directories" do
   title "Ensure users own their home directories"

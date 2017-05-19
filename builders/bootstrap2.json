@@ -1,8 +1,12 @@
 {
 	"variables": {
 			"region": "us-east-1",
-			"buildtime": "{{ isotime \"2006-01-02-1504\" }}"
-	},
+			"buildtime": "{{ isotime \"2006-01-02-1504\" }}",
+			"creator": "bootstrap",
+			"local_ssh_keypair_name": "",
+			"local_ssh_private_key_file": "",
+			"parent_ami_id": ""
+	},``
 	"builders": [{
 		"type": "amazon-ebs",
 		"region": "{{ user `region` }}",
@@ -11,22 +15,28 @@
 		"instance_type": "t2.micro",
 		"ssh_username": "ubuntu",
 		"ami_name": "base-unbuntu-16.04-{{timestamp}}",
-		"ssh_keypair_name": "rchawla-bootstrap",
-		"ssh_private_key_file": "/Users/ranbir/.ssh/rchawla-bootstrap",
+		"ssh_keypair_name": "{{ user `local_ssh_keypair_name` }}",
+		"ssh_private_key_file": "{{ user `local_ssh_private_key_file`}}",
 		"run_tags": {
 				"Name": "Packer Builder - build-mount-unbuntu-16.04",
 				"Project": "di-bootstrap",
-				"creator": "{{ user `creator` }}"
+				"creator": "{{ user `creator` }}",
+				"purpose": "temporary-bootstrap2",
+				"os": "16.04LTS"
 		},
 		"run_volume_tags": {
 				"Name": "Packer Builder - build-mount-unbuntu-16.04",
 				"Project": "di-bootstrap",
-				"creator": "{{ user `creator` }}"
+				"creator": "{{ user `creator` }}",
+				"purpose": "temporary-bootstrap2",
+				"os": "16.04LTS"
 		},
 		"tags": {
 				"Name": "build-mount-unbuntu-16.04-{{timestamp}}",
 				"BuildTime": "{{ user `buildtime` }}",
-				"creator": "{{ user `creator` }}"
+				"creator": "{{ user `creator` }}",
+				"purpose": "temporary-bootstrap2",
+				"os": "16.04LTS"
 		},
 		"ami_block_device_mappings": [{
 			"device_name": "/dev/sda1",
@@ -43,8 +53,8 @@
 	}],
 	"provisioners": [{
 			"type": "file",
-			"source": "builders/setup-mounts.sh",
-			"destination": "/tmp/setup-mounts.sh"
+			"source": "setup-mounts.sh",
+			"destination": "/home/ubuntu/setup-mounts.sh"
 		},
 		{
 			"type": "shell",
@@ -54,7 +64,7 @@
 		},
 		{
 			"type": "shell",
-			"script": "builders/mounts-bootstrap.sh"
+			"script": "mounts-bootstrap.sh"
 		}
 	],
 	"post-processors": [{

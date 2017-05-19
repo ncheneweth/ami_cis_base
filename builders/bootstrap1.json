@@ -2,12 +2,16 @@
 	"variables": {
 		"region": "us-east-1",
 		"buildtime": "{{ isotime \"2006-01-02-1504\" }}",
-		"creator": "rchawla-bootstrap"
+		"creator": "bootstrap",
+		"local_ssh_keypair_name": "",
+		"local_ssh_private_key_file": ""
 	},
 	"builders": [{
 		"type": "amazon-ebs",
 		"region": "{{ user `region` }}",
 		"spot_price_auto_product": "Linux/UNIX (Amazon VPC)",
+		"ssh_keypair_name": "{{ user `local_ssh_keypair_name` }}",
+		"ssh_private_key_file": "{{ user `local_ssh_private_key_file`}}",
 		"source_ami_filter": {
 			"filters": {
 				"virtualization-type": "hvm",
@@ -21,7 +25,7 @@
 		"ami_name": "min-vol-unbuntu-16.04-{{timestamp}}",
 		"ami_block_device_mappings": [{
 			"device_name": "/dev/sda1",
-			"volume_size": 12,
+			"volume_size": 8,
 			"volume_type": "gp2",
 			"delete_on_termination": true
 		}],
@@ -34,17 +38,23 @@
 		"run_tags": {
 			"Name": "Packer Builder - min-vol-unbuntu-16.04",
 			"Project": "di-bootstrap",
-			"creator": "{{ user `creator` }}"
+			"creator": "{{ user `creator` }}",
+			"purpose": "temporary-bootstrap1",
+			"os": "16.04LTS"
 		},
 		"run_volume_tags": {
 			"Name": "Packer Builder - min-vol-unbuntu-16.04",
 			"Project": "di-bootstrap",
-			"creator": "{{ user `creator` }}"
+			"creator": "{{ user `creator` }}",
+			"purpose": "temporary-bootstrap1",
+			"os": "16.04LTS"
 		},
 		"tags": {
 			"Name": "min-vol-unbuntu-16.04-{{timestamp}}",
 			"BuildTime": "{{ user `buildtime` }}",
-			"creator": "{{ user `creator` }}"
+			"creator": "{{ user `creator` }}",
+			"purpose": "temporary-bootstrap1",
+			"os": "16.04LTS"
 		}
 	}],
 	"provisioners": [{

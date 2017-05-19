@@ -25,8 +25,7 @@ sudo mkfs -t xfs /dev/vgpool/home_root
 echo "file systems created"
 
 # setup mounts in fstab
-sudo cp /tmp/setup-mounts.sh /root/setup-mounts.sh
-sudo /root/setup-mounts.sh
+sudo /home/ubuntu/setup-mounts.sh
 
 echo "moving var"
 sudo mkdir /mnt/var
@@ -72,3 +71,6 @@ echo "mounted /var/log/audit"
 
 echo "install python"
 sudo apt-get install -y python
+
+echo "cleanup scripts"
+sudo rm /home/ubuntu/setup-mounts.sh

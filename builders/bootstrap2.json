@@ -6,7 +6,7 @@
 			"local_ssh_keypair_name": "",
 			"local_ssh_private_key_file": "",
 			"parent_ami_id": ""
-	},``
+	},
 	"builders": [{
 		"type": "amazon-ebs",
 		"region": "{{ user `region` }}",

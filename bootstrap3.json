@@ -1,0 +1,78 @@
+{
+  "variables": {
+			"region": "us-east-1",
+			"buildtime": "{{ isotime \"2006-01-02-1504\" }}",
+      "creator": "bootstrap",
+  		"local_ssh_keypair_name": "",
+  		"local_ssh_private_key_file": "",
+      "parent_ami_id":""
+	},
+	"builders": [{
+		"type": "amazon-ebs",
+		"region": "{{ user `region` }}",
+		"spot_price_auto_product": "Linux/UNIX (Amazon VPC)",
+		"source_ami": "{{ user `parent_ami_id`}}",
+		"instance_type": "t2.micro",
+		"ssh_username": "ubuntu",
+		"ami_name": "cis-unbuntu-16.04-{{timestamp}}",
+    "ssh_keypair_name": "{{ user `local_ssh_keypair_name` }}",
+		"ssh_private_key_file": "{{ user `local_ssh_private_key_file`}}",
+		"run_tags": {
+				"Name": "Packer Builder - cis-unbuntu-16.04",
+				"Project": "di-bootstrap",
+				"creator": "{{ user `creator` }}",
+				"purpose": "cis-base-creator",
+				"os": "16.04LTS"
+		},
+		"run_volume_tags": {
+				"Name": "Packer Builder - cis-unbuntu-16.04",
+				"Project": "di-bootstrap",
+				"creator": "{{ user `creator` }}",
+				"purpose": "cis-base-creator",
+				"os": "16.04LTS"
+		},
+		"tags": {
+				"Name": "cis-unbuntu-16.04-{{timestamp}}",
+				"BuildTime": "{{ user `buildtime` }}",
+				"creator": "{{ user `creator` }}",
+				"purpose": "cis-base",
+				"os": "16.04LTS"
+		},
+		"ami_block_device_mappings": [{
+			"device_name": "/dev/sda1",
+			"volume_size": 30,
+			"volume_type": "gp2",
+			"delete_on_termination": true
+		}],
+		"launch_block_device_mappings": [{
+			"device_name": "/dev/sda1",
+			"volume_size": 30,
+			"volume_type": "gp2",
+			"delete_on_termination": true
+		}]
+	}],
+	"provisioners": [
+    {
+      "type": "shell",
+      "remote_folder":"/home/ubuntu",
+      "inline": [
+        "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 1; done"
+      ]
+    },
+    {
+      "type": "shell",
+      "remote_folder": "/home/ubuntu",
+      "script": "scripts/remove-old-dirs.sh"
+    },
+		{
+			"type": "ansible",
+			"playbook_file": "provision.yml",
+      "user": "ubuntu"
+		}
+	],
+	"post-processors": [{
+		"type": "manifest",
+		"output": "bootstrap3-manifest.json",
+		"strip_path": true
+	}]
+}

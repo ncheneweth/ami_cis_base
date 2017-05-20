@@ -1,0 +1,79 @@
+{
+	"variables": {
+			"region": "us-east-1",
+			"buildtime": "{{ isotime \"2006-01-02-1504\" }}",
+			"creator": "bootstrap",
+			"local_ssh_keypair_name": "",
+			"local_ssh_private_key_file": "",
+			"parent_ami_id": "",
+			"aws_access_key": "",
+			"aws_secret_key": ""
+	},
+	"builders": [{
+		"type": "amazon-ebs",
+		"region": "{{ user `region` }}",
+		"access_key": "{{user `aws_access_key`}}",
+		"secret_key": "{{user `aws_secret_key`}}",
+		"spot_price_auto_product": "Linux/UNIX (Amazon VPC)",
+		"source_ami": "{{ user `parent_ami_id`}}",
+		"instance_type": "t2.micro",
+		"ssh_username": "ubuntu",
+		"ami_name": "base-unbuntu-16.04-{{timestamp}}",
+		"ssh_keypair_name": "{{ user `local_ssh_keypair_name` }}",
+		"ssh_private_key_file": "{{ user `local_ssh_private_key_file`}}",
+		"run_tags": {
+				"Name": "Packer Builder - build-mount-unbuntu-16.04",
+				"Project": "di-bootstrap",
+				"creator": "{{ user `creator` }}",
+				"purpose": "temporary-bootstrap2",
+				"os": "16.04LTS"
+		},
+		"run_volume_tags": {
+				"Name": "Packer Builder - build-mount-unbuntu-16.04",
+				"Project": "di-bootstrap",
+				"creator": "{{ user `creator` }}",
+				"purpose": "temporary-bootstrap2",
+				"os": "16.04LTS"
+		},
+		"tags": {
+				"Name": "build-mount-unbuntu-16.04-{{timestamp}}",
+				"BuildTime": "{{ user `buildtime` }}",
+				"creator": "{{ user `creator` }}",
+				"purpose": "temporary-bootstrap2",
+				"os": "16.04LTS"
+		},
+		"ami_block_device_mappings": [{
+			"device_name": "/dev/sda1",
+			"volume_size": 30,
+			"volume_type": "gp2",
+			"delete_on_termination": true
+		}],
+		"launch_block_device_mappings": [{
+			"device_name": "/dev/sda1",
+			"volume_size": 30,
+			"volume_type": "gp2",
+			"delete_on_termination": true
+		}]
+	}],
+	"provisioners": [{
+			"type": "file",
+			"source": "scripts/setup-mounts.sh",
+			"destination": "/home/ubuntu/setup-mounts.sh"
+		},
+		{
+			"type": "shell",
+			"inline": [
+				"while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 1; done"
+			]
+		},
+		{
+			"type": "shell",
+			"script": "scripts/mounts-bootstrap.sh"
+		}
+	],
+	"post-processors": [{
+		"type": "manifest",
+		"output": "bootstrap2-manifest.json",
+		"strip_path": true
+	}]
+}

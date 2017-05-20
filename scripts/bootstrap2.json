@@ -5,13 +5,17 @@
 			"creator": "bootstrap",
 			"local_ssh_keypair_name": "",
 			"local_ssh_private_key_file": "",
-			"parent_ami_id": ""
+			"parent_ami_id": "",
+			"aws_access_key": "",
+			"aws_secret_key": ""
 	},
 	"builders": [{
 		"type": "amazon-ebs",
 		"region": "{{ user `region` }}",
+		"access_key": "{{user `aws_access_key`}}",
+		"secret_key": "{{user `aws_secret_key`}}",
 		"spot_price_auto_product": "Linux/UNIX (Amazon VPC)",
-		"source_ami": "ami-23215a35",
+		"source_ami": "{{ user `parent_ami_id`}}",
 		"instance_type": "t2.micro",
 		"ssh_username": "ubuntu",
 		"ami_name": "base-unbuntu-16.04-{{timestamp}}",
@@ -53,7 +57,7 @@
 	}],
 	"provisioners": [{
 			"type": "file",
-			"source": "setup-mounts.sh",
+			"source": "builders/setup-mounts.sh",
 			"destination": "/home/ubuntu/setup-mounts.sh"
 		},
 		{
@@ -64,7 +68,7 @@
 		},
 		{
 			"type": "shell",
-			"script": "mounts-bootstrap.sh"
+			"script": "builders/mounts-bootstrap.sh"
 		}
 	],
 	"post-processors": [{

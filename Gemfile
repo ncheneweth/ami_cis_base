@@ -7,3 +7,4 @@ gem 'test-kitchen'
 gem "kitchen-vagrant"
 gem 'kitchen-ansible'
 gem 'kitchen-inspec'
+gem 'kitchen-ec2'

@@ -1,0 +1,9 @@
+---
+- name: wrapper playbook for kitchen testing of the cis setup
+  hosts: all
+  become: yes
+  user: provisioner
+  tags:
+    - level-2
+  roles:
+    - cis

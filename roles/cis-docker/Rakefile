@@ -1,0 +1,31 @@
+require 'rubocop/rake_task'
+
+desc 'Run Ruby style checks'
+RuboCop::RakeTask.new(:style)
+
+task :update_vagrant do
+  system('vagrant box update')
+end
+
+task :clean_build do
+  system('bundle exec kitchen destroy')
+end
+
+task :validate => :update_vagrant do
+  system('bundle exec kitchen verify')
+end
+
+# assumes a box running with port forwarding on 2222
+#task :vagrant do
+#  system('bundle exec kitchen verify')
+#end
+# for now we're just validating - once we have Packer here we can add steps in parent rake filesystem
+task test: %w(style clean_build validate)
+task default: %w(style validate)
+
+begin
+  require 'kitchen/rake_tasks'
+  Kitchen::RakeTasks.new
+rescue LoadError
+  puts '>>>>> Kitchen gem not loaded, omitting tasks' unless ENV['CI']
+end

@@ -1,0 +1,11 @@
+---
+- name: 3.1 Verify that docker.service file ownership is set to root:root (Scored)
+  file:
+    path: /lib/systemd/system/docker.service
+    owner: root
+    group: root
+
+- name: 3.2 Verify that docker.service file permissions are set to 644 or more restrictive (Scored)
+  file:
+    path: /lib/systemd/system/docker.service
+    mode: 0644

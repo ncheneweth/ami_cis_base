@@ -1,0 +1,5 @@
+---
+# file: handlers/main.yml
+- name: restart auditd
+  service: name=auditd state=restarted
+# vim: set sw=2 ts=2:

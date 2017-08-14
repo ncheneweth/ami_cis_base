@@ -1,0 +1,113 @@
+---
+# Create a new primary partition for LVM
+- name: 1.1 Create a separate partition for containers (Scored)
+  filesystem:
+    fstype: xfs
+    dev: /dev/vgpool/var_lib_docker
+  tags:
+    - Scored
+    - section1
+    - section1.1
+
+- name: 1.1 Mount a separate partition for containers (Scored)
+  mount:
+    path: /var/lib/docker
+    src: /dev/vgpool/var_lib_docker
+    state: present
+    fstype: xfs
+  tags:
+    - Scored
+    - section1
+    - section1.1
+
+- name: ensure repository key is installed
+  apt_key:
+    id: "58118E89F3A912897C070ADBF76221572C52609D"
+    keyserver: "hkp://p80.pool.sks-keyservers.net:80"
+    state: present
+
+- name: ensure docker registry is available
+  # For Ubuntu 16.04 LTS, use this repo instead:
+  apt_repository: repo='deb https://apt.dockerproject.org/repo ubuntu-xenial main' state=present
+
+- name: ensure docker and dependencies are installed
+  apt: name=docker-engine update_cache=yes
+
+- name: 1.5 Audit docker daemon (Scored)
+  lineinfile:
+    path: /etc/audit/audit.rules
+    state: present
+    regexp: '^\-w\s*\/usr\/bin\/docker\s*\-k\s*docker'
+    line: '-w /usr/bin/docker -k docker'
+  notify: restart auditd
+
+- name: 1.6 Audit Docker files and directories - /var/lib/docker (Scored)
+  lineinfile:
+    path: /etc/audit/audit.rules
+    state: present
+    regexp: '^\-w\s*\/var\/lib\/docker\s*\-k\s*docker'
+    line: '-w /var/lib/docker -k docker'
+  notify: restart auditd
+
+- name: 1.7 Audit Docker files and directories - /etc/docker (Scored)
+  lineinfile:
+    path: /etc/audit/audit.rules
+    state: present
+    regexp: '^\-w\s*\/etc\/docker\s*\-k\s*docker'
+    line: '-w /etc/docker -k docker'
+  notify: restart auditd
+
+- name: 1.8 Audit Docker files and directories - docker.service (Scored)
+  lineinfile:
+    path: /etc/audit/audit.rules
+    state: present
+    regexp: '\-w\s*\/lib\/systemd\/system\/docker\.service\s*\-k\s*docker'
+    line: '-w /lib/systemd/system/docker.service -k docker'
+  notify: restart auditd
+
+- name: 1.9 Audit Docker files and directories - docker.socket (Scored)
+  lineinfile:
+    path: /etc/audit/audit.rules
+    state: present
+    regexp: '\-w\s*\/lib\/systemd\/system\/docker\.socket\s*\-k\s*docker'
+    line: '-w /lib/systemd/system/docker.socket -k docker'
+  notify: restart auditd
+
+- name: 1.10 Audit Docker files and directories - /etc/default/docker (Scored)
+  lineinfile:
+    path: /etc/audit/audit.rules
+    state: present
+    regexp: '\-w\s*\/etc\/default\/docker\s*\-k\s*docker'
+    line: '-w /etc/default/docker -k docker'
+  notify: restart auditd
+
+- name: 1.11 Audit Docker files and directories - /etc/docker/daemon.json (Scored)
+  lineinfile:
+    path: /etc/audit/audit.rules
+    state: present
+    regexp: '\-w\s*\/etc\/docker\/daemon\.json\s*\-k\s*docker'
+    line: '-w /etc/docker/docker.json -k docker'
+  notify: restart auditd
+
+- name: 1.12 Audit Docker files and directories - /usr/bin/docker-containerd (Scored)
+  lineinfile:
+    path: /etc/audit/audit.rules
+    state: present
+    regexp: '\-w\s*\/usr\/bin\/docker-containerd\s*\-k\s*docker'
+    line: '-w /usr/bin/docker-containerd -k docker'
+  notify: restart auditd
+
+- name: "1.13 Audit Docker files and directories - /usr/bin/docker-runc (Scored)"
+  lineinfile:
+    path: /etc/audit/audit.rules
+    state: present
+    regexp: '\-w\s*\/usr\/bin\/docker-runc\s*\-k\s*docker'
+    line: '-w /usr/bin/docker-runc -k docker'
+  notify: restart auditd
+
+# Uncomment the following to enable insecure registries with Docker
+#- name: ensure docker can use insecure registries in 10.11.0.0/16
+#  lineinfile: "dest=/etc/default/docker regexp=^DOCKER_OPTS line=DOCKER_OPTS='--insecure-registry 10.11.0.0/16'"
+
+- service: name=docker state=restarted
+# vim: set sw=2 ts=2:

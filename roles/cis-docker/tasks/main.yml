@@ -1,0 +1,7 @@
+---
+# file: tasks/main.yml
+- include: section-01.yml
+  tags: section-01
+
+- include: section-03.yml
+  tags: section-03

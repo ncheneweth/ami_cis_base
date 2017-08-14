@@ -1,0 +1,11 @@
+name: cis-server-benchmarks
+title: Linux Server Security
+maintainer: Nic Cheneweth
+copyright: apache 2.0
+copyright_email: nic.cheneweth@thoughtworks.com
+license: Apache 2 license
+summary: InSpec testing profile to verify server configuration against cis benchmarks
+version: 1.0.0
+supports:
+  - os-name: ubuntu
+    release: 16.04

@@ -1,0 +1,42 @@
+---
+driver:
+  name: ec2
+  aws_ssh_key_id: rchawla-bootstrap
+  security_group_ids: ["sg-00ea6e7e"]
+  region: us-east-1
+  availability_zone: a
+  require_chef_omnibus: true
+  instance_type: t2.micro
+  associate_public_ip: true
+
+provisioner:
+  hosts: test-kitchen
+  name: ansible_playbook
+  # Use el7 epel repo instead of the default el6
+  ansible_yum_repo: "https://download.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm"
+  require_chef_for_busser: false
+  require_ruby_for_busser: false
+  ansible_verbosity: 2
+  ansible_verbose: true
+  ansible_extra_flags: <%= ENV['ANSIBLE_EXTRA_FLAGS'] %>
+  # starting playbook is at: test/integration/default/default.yml
+
+verifier:
+  name: inspec
+
+platforms:
+  - name: aws-ubuntu-16.04
+    driver:
+      image_id: ami-8192e897
+      block_device_mappings:
+        - device_name: /dev/sda1
+          ebs:
+            volume_type: gp2
+            volume_size: 100
+            delete_on_termination: true
+    transport:
+      ssh_key: /Users/rchawla/.ssh/rchawla-bootstrap.pem
+      username: ubuntu
+
+suites:
+  - name: default

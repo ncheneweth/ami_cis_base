@@ -108,3 +108,13 @@ control "3.2 Verify that docker.service file mode is 644 (Scored)" do
     its('mode') { should cmp '0644' }
   end
 end
+
+control "3.3 Verify that docker.socket file ownership is set to root:root (Scored)" do
+  title "Ensure docker.service file ownership is root"
+  desc  "'docker.service' file contains sensitive parameters that may alter the behavior of Docker daemon. Hence, it should be owned and group-owned by 'root' to maintain the integrity of the file."
+  impact 1.0
+  describe file("/lib/systemd/system/docker.socket") do
+    its('owner') { should eq 'root' }
+    its('group') { should eq 'root'}
+  end
+end

@@ -9,3 +9,9 @@
   file:
     path: /lib/systemd/system/docker.service
     mode: 0644
+
+- name: 3.3 Verify that docker.socket file ownership is set to root:root (Scored)
+  file:
+    path: /lib/systemd/system/docker.socket
+    owner: root
+    group: root

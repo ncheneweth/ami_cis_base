@@ -8,7 +8,7 @@ jobs:
           password: $QUAY_TOKEN
 
     steps:
-      - checkout
+      - checkout /
       - run:
           command: bundle install
       - run:
@@ -20,6 +20,10 @@ jobs:
             aws_access_key_id=$AWS_ACCESS_KEY_ID
             aws_secret_access_key=$AWS_SECRET_ACCESS_KEY
             EOF
+      - run:
+          command: ls -ls && pwd
+      - run:
+          command: cd $CIRCLE_WORKING_DIRECTORY && ls -pl
       - run:
           command: /step1.py
       - run:

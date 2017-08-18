@@ -21,8 +21,8 @@ jobs:
             aws_secret_access_key=$AWS_SECRET_ACCESS_KEY
             EOF
       - run:
-          command: step1.py
+          command: $CIRCLE_WORKING_DIRECTORY/step1.py
       - run:
-          command: step2.py
+          command: $CIRCLE_WORKING_DIRECTORY/step2.py
       - run:
-          command: step3.py
+          command: $CIRCLE_WORKING_DIRECTORY/step3.py

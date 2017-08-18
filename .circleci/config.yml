@@ -8,8 +8,7 @@ jobs:
           password: $QUAY_TOKEN
 
     steps:
-      - checkout:
-          path: /
+      - checkout
       - run:
           command: bundle install
       - run:

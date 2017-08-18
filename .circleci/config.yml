@@ -23,8 +23,8 @@ jobs:
       - run:
           command: ls -ls && pwd
       - run:
-          command: cd $CIRCLE_WORKING_DIRECTORY && ./step1.py
+          command: ./step1.py
       - run:
-          command: /step2.py
+          command: ./step2.py
       - run:
-          command: /step3.py
+          command: ./step3.py

@@ -2,7 +2,7 @@ version: 2.0
 jobs:
   build:
     docker:
-      - image: quay.io/thoughtworks_aelab/circleci-docker:1.22
+      - image: quay.io/thoughtworks_aelab/circleci-docker:1.23
         auth:
           username: $DOCKER_USER
           password: $QUAY_TOKEN

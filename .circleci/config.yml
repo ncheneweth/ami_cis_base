@@ -1,0 +1,28 @@
+version: 2.0
+jobs:
+  build:
+    docker:
+      - image: quay.io/thoughtworks_aelab/circleci-docker:1.20
+        auth:
+          username: $DOCKER_USER
+          password: $QUAY_TOKEN
+
+    steps:
+      - checkout
+      - run:
+          command: bundle install
+      - run:
+          command: mkdir ~/.aws
+      - run:
+          command: |
+            cat <<EOF > ~/.aws/credentials
+            [default]
+            aws_access_key_id=$AWS_ACCESS_KEY_ID
+            aws_secret_access_key=$AWS_SECRET_ACCESS_KEY
+            EOF
+      - run:
+          command: step1.py
+      - run:
+          command: step2.py
+      - run:
+          command: step3.py

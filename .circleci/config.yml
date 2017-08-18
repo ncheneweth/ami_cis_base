@@ -10,7 +10,11 @@ jobs:
     steps:
       - checkout
       - run:
+        command: cd / && ls -l
+      - run:
           command: export PATH=$PATH:/
+      - run:
+          command: env
       - run:
           command: bundle install
       - run:
